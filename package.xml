@@ -24,16 +24,15 @@ OS (for example against Windows Active-Directory via IAS).
   
   <license>BSD</license>
 
-   <release>
-      <version>1.2.3</version>
-      <date>2003-11-04</date>
-      <state>stable</state>
-      <notes>
-      - Release 1.2.3
-      - Fixed a typo in radius_init_const wich caused RADIUS_ACCT_STATUS_TYPE to be undefined.
-      - Re-added Makefile.in
-      </notes>
-    </release>
+  <release>
+    <version>1.2.4</version>
+    <date>2003-11-17</date>
+    <state>stable</state>
+    <notes>
+    - Release 1.2.4
+    - Forgot including updated radius_init_const.h
+    </notes>
+  </release>
 
   <filelist>
     <dir role="src" name="/">
@@ -64,6 +63,16 @@ OS (for example against Windows Active-Directory via IAS).
   </filelist>
    
   <changelog>
+
+   <release>
+      <version>1.2.4</version>
+      <date>2003-11-17</date>
+      <state>stable</state>
+      <notes>
+      - Release 1.2.4
+      - Forgot including updated radius_init_const.h
+      </notes>
+    </release>
 
    <release>
       <version>1.2.3</version>
