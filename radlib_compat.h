@@ -34,14 +34,21 @@ any other GPL-like (LGPL, GPL2) License.
 #ifndef _RADLIB_COMPAT_H_
 #define _RADLIB_COMPAT_H_
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "php.h"
 #include "ext/standard/php_rand.h"
 #include "ext/standard/php_standard.h"
 
 #define MPPE_KEY_LEN    16
 
-#ifdef PHP_WIN32
+#ifndef HAVE_U_INT32_T
 typedef unsigned int u_int32_t;
+#endif
+
+#ifdef PHP_WIN32
 typedef long ssize_t;
 int inet_aton(const char *cp, struct in_addr *inp);
 char *strsep(char **stringp,	const char *delim);
@@ -54,27 +61,27 @@ char *strsep(char **stringp,	const char *delim);
 #endif
 
 #ifndef timeradd
-#define timeradd(tvp, uvp, vvp)                                     \
-    do {                                                            \
-        (vvp)->tv_sec = (tvp)->tv_sec + (uvp)->tv_sec;              \
-        (vvp)->tv_usec = (tvp)->tv_usec + (uvp)->tv_usec;           \
-        if ((vvp)->tv_usec >= 1000000) {                            \
-            (vvp)->tv_sec++;                                        \
-            (vvp)->tv_usec -= 1000000;                              \
-        }                                                           \
-    } while (0)
+#define timeradd(tvp, uvp, vvp)		\
+	do {		\
+		(vvp)->tv_sec = (tvp)->tv_sec + (uvp)->tv_sec;		\
+		(vvp)->tv_usec = (tvp)->tv_usec + (uvp)->tv_usec;		\
+		if ((vvp)->tv_usec >= 1000000) {		\
+			(vvp)->tv_sec++;		\
+			(vvp)->tv_usec -= 1000000;		\
+		}		\
+	} while (0)
 #endif
 
 #ifndef timersub
-#define timersub(tvp, uvp, vvp)                                     \
-    do {                                                            \
-        (vvp)->tv_sec = (tvp)->tv_sec - (uvp)->tv_sec;              \
-        (vvp)->tv_usec = (tvp)->tv_usec - (uvp)->tv_usec;           \
-        if ((vvp)->tv_usec < 0) {                                   \
-            (vvp)->tv_sec--;                                        \
-            (vvp)->tv_usec += 1000000;                              \
-        }                                                           \
-    } while (0)
+#define timersub(tvp, uvp, vvp)		\
+	do {		\
+		(vvp)->tv_sec = (tvp)->tv_sec - (uvp)->tv_sec;		\
+		(vvp)->tv_usec = (tvp)->tv_usec - (uvp)->tv_usec;		\
+		if ((vvp)->tv_usec < 0) {		\
+			(vvp)->tv_sec--;		\
+			(vvp)->tv_usec += 1000000;		\
+		}		\
+	} while (0)
 #endif
 
 #endif
