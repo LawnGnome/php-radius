@@ -106,7 +106,7 @@ zend_module_entry radius_module_entry = {
 	NULL,
 	PHP_MINFO(radius),
 #if ZEND_MODULE_API_NO >= 20010901
-	"1.1", /* Replace with version number for your extension */
+	"1.2.2", /* Replace with version number for your extension */
 #endif
 	STANDARD_MODULE_PROPERTIES
 };
