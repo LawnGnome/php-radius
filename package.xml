@@ -38,6 +38,7 @@ OS (for example against Windows Active-Directory via IAS).
   <filelist>
     <dir role="src" name="/">
       <file>CREDITS</file>
+      <file>Makefile.in</file>
       <file>config.m4</file>
       <file>php_radius.h</file>
       <file>radius.c</file>        
