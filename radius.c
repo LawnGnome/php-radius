@@ -173,7 +173,8 @@ PHP_RSHUTDOWN_FUNCTION(radius)
 PHP_MINFO_FUNCTION(radius)
 {
     php_info_print_table_start();
-    php_info_print_table_header(2, "radius support", "enabled");
+    php_info_print_table_row(2, "radius support", "enabled");
+	php_info_print_table_row(2, "Revision", "$Revision$");
     php_info_print_table_end();
 
     /* Remove comments if you have entries in php.ini
