@@ -4,7 +4,7 @@
 <package>
 
 
-  <name>Net_Radius</name>
+  <name>radius</name>
   <summary>Radius client library</summary>
   <description>
 This package is based on the libradius of FreeBSD. This PECL adds full support for 
@@ -35,7 +35,6 @@ For install instructions see the manual at pear.php.net
     </notes>
   </release>
   
-  
   <filelist>
     <dir role="src" name="/">
         <file>CREDITS</file>
@@ -47,7 +46,6 @@ For install instructions see the manual at pear.php.net
         <file>radius.conf</file>
         <file>radius.dsp</file>
         <file>radius.dsw</file>
-        <file>radius.php</file>
         <file>radius_init_const.h</file>
         <file>radlib.c</file>
         <file>radlib.h</file>                        
@@ -55,7 +53,11 @@ For install instructions see the manual at pear.php.net
         <file>radlib_compat.h</file>
         <file>radlib_md5.h</file>
         <file>radlib_private.h</file>                        
-        <file>radlib_vs.h</file>                                
+        <file>radlib_vs.h</file>
+        <dir name="examples">
+          <file>radius.php</file>
+          <file>mschap.php</file>
+        </dir>
     </dir>
   </filelist>
    

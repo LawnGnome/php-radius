@@ -15,7 +15,8 @@ foreach($functions as $func) {
 }
 
 //$auth_type = 'chap';
-$auth_type = 'pap';
+//$auth_type = 'pap';
+$auth_type = 'mschapv1';
 
 $res = radius_auth_open();
 echo "$res<br>\n";
@@ -65,15 +66,45 @@ if ($auth_type == 'chap') {
 	$pass = pack('CH*', 1, $chapval);
 
 	if (!radius_put_attr($res, RADIUS_CHAP_PASSWORD, $pass)) {
-		echo 'RadiusError: RAD_CHAP_PASSWORD:' . radius_strerror($res). "<br>\n";
+		echo 'RadiusError: RADIUS_CHAP_PASSWORD:' . radius_strerror($res). "<br>\n";
 		exit;
 	}
 
 	if (!radius_put_attr($res, RADIUS_CHAP_CHALLENGE, $chall)) {
-		echo 'RadiusError: RAD_CHAP_CHALLENGE:' . radius_strerror($res). "<br>\n";
+		echo 'RadiusError: RADIUS_CHAP_CHALLENGE:' . radius_strerror($res). "<br>\n";
 		exit;
 	}
 
+}  else if ($auth_type == 'mschapv1') {
+	echo "MS-CHAPv1<br>\n";
+    include_once('mschap.php');
+    
+    $chall = GenerateChallenge();
+    printf ("Challenge:%s\n", bin2hex($chall));
+
+	if (!radius_put_vendor_attr($res, RADIUS_VENDOR_MICROSOFT, RADIUS_MICROSOFT_MS_CHAP_CHALLENGE, $chall)) {
+		echo 'RadiusError: RADIUS_MICROSOFT_MS_CHAP_CHALLENGE:' . radius_strerror($res). "<br>\n";
+		exit;
+	}
+    
+    $ntresp = ChallengeResponse(NtPasswordHash('sepp'), $chall);
+    $lmresp = str_repeat ("\0", 24);
+
+    printf ("NT Response:%s\n", bin2hex($ntresp));
+    $resp = pack('CCa48',1 , 1, $lmresp . $ntresp);
+    printf ("Response:%d %s\n", strlen($resp), bin2hex($resp));    
+    
+/*      mschapres.ident = chapid;
+      mschapres.flags = 0x01;
+      memcpy(mschapres.lm_response, mschapv->lmHash, 24);
+      memcpy(mschapres.nt_response, mschapv->ntHash, 24);
+  */    
+	if (!radius_put_vendor_attr($res, RADIUS_VENDOR_MICROSOFT, RADIUS_MICROSOFT_MS_CHAP_RESPONSE, $resp)) {
+		echo 'RadiusError: RADIUS_MICROSOFT_MS_CHAP_RESPONSE:' . radius_strerror($res). "<br>\n";
+		exit;
+	}
+    
+        
 } else {
 	echo "PAP<br>\n";
 
