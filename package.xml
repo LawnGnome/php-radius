@@ -24,28 +24,21 @@ OS (for example against Windows Active-Directory via IAS).
   
   <license>BSD</license>
 
-    <release>
-      <version>1.2.1</version>
-      <date>2003-05-02</date>
+   <release>
+      <version>1.2.2</version>
+      <date>2003-XX-XX</date>
       <state>stable</state>
       <notes>
-      - Release 1.2.1   
-      - Change License to BSD
-      - BugFix: The MS-CHAPv2 Authenticator-Challenge has 16 Bytes and not 8 Bytes
-      - BugFix: build under Solaris
-      - Generate better challenges
-      - Many source-code-style fixes
-      - Removed unneeded sources
-      - Some cleanup's
+      - Release 1.2.2 
+      - Changed role for example-files to doc
+      - Removed deprecated files
       </notes>
     </release>
     
   <filelist>
     <dir role="src" name="/">
       <file>CREDITS</file>
-      <file>Makefile.in</file>
       <file>config.m4</file>
-      <file>libs.mk</file>
       <file>php_radius.h</file>
       <file>radius.c</file>        
       <file>radius.conf</file>
@@ -59,7 +52,7 @@ OS (for example against Windows Active-Directory via IAS).
       <file>radlib_md5.h</file>
       <file>radlib_private.h</file>                        
       <file>radlib_vs.h</file>
-      <dir name="examples">
+      <dir name="examples" role="doc">
         <file>radius-auth.php</file>
         <file>radius-acct.php</file>
         <file>des.php</file>
@@ -70,6 +63,17 @@ OS (for example against Windows Active-Directory via IAS).
   </filelist>
    
   <changelog>
+
+   <release>
+      <version>1.2.2</version>
+      <date>2003-XX-XX</date>
+      <state>stable</state>
+      <notes>
+      - Release 1.2.2 
+      - Changed role for example-files to doc
+      - Removed deprecated files
+      </notes>
+    </release>
 
     <release>
       <version>1.2.1</version>
