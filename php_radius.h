@@ -52,10 +52,8 @@ any other GPL-like (LGPL, GPL2) License.
 extern zend_module_entry radius_module_entry;
 
 typedef struct {
-    int id;
-    short request_created;
-    char errmsg[ERRSIZE];
-    struct rad_handle *radh;
+	int id;
+	struct rad_handle *radh;
 } radius_descriptor;
 
 PHP_MINIT_FUNCTION(radius);
@@ -89,26 +87,6 @@ PHP_FUNCTION(radius_request_authenticator);
 PHP_FUNCTION(radius_server_secret);
 PHP_FUNCTION(radius_demangle);
 PHP_FUNCTION(radius_demangle_mppe_key);
-
-/*
-  	Declare any global variables you may need between the BEGIN
-	and END macros here:     
-
-ZEND_BEGIN_MODULE_GLOBALS(radius)
-	int   global_value;
-	char *global_string;
-ZEND_END_MODULE_GLOBALS(radius)
-*/
-
-/* In every utility function you add that needs to use variables
-   in php_radius_globals, call TSRM_FETCH(); after declaring other 
-   variables used by that function, or better yet, pass in TSRMG_CC
-   after the last function argument and declare your utility function
-   with TSRMG_DC after the last declared argument.  Always refer to
-   the globals in your function as RADIUS_G(variable).  You are
-   encouraged to rename these macros something shorter, see
-   examples in any other php module directory.
-*/
 
 #ifdef ZTS
 #define RADIUS_G(v) TSRMG(radius_globals_id, zend_radius_globals *, v)

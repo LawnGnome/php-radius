@@ -535,7 +535,7 @@ rad_create_request(struct rad_handle *h, int code)
 		h->request[POS_AUTH+i+1] = (unsigned char) (r >> 8);
 	}
 	h->req_len = POS_ATTRS;
-    h->request_created = 1;    
+	h->request_created = 1;    
 	clear_password(h);
 	return 0;
 }
