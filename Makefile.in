@@ -1,0 +1,9 @@
+# $Id$
+
+LTLIBRARY_NAME          = libradius.la
+LTLIBRARY_SOURCES       = radius.c radlib.c
+LTLIBRARY_SHARED_NAME   = radius.la
+LTLIBRARY_LIBADD  			= $(RADIUS_LIBADD)
+LTLIBRARY_SHARED_LIBADD = $(RADIUS_SHARED_LIBADD)
+
+include $(top_srcdir)/build/dynlib.mk
