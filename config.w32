@@ -1,0 +1,9 @@
+// $Id$
+// vim:ft=javascript
+
+ARG_WITH("radius", "Radius Support", "no");
+
+if (PHP_RADIUS == "yes") {
+	EXTENSION("radius", "radius.c radlib.c radlib_compat.c");
+	AC_DEFINE('HAVE_RADIUS', 1, 'Have Radius support', false);
+}
