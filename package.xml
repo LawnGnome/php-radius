@@ -32,6 +32,7 @@ OS (for example against Windows Active-Directory via IAS).
       - Release 1.2.2 
       - Changed role for example-files to doc
       - Removed deprecated files
+      - Added IPv6 related attributes defined in RFC3162
       </notes>
     </release>
     
@@ -72,6 +73,7 @@ OS (for example against Windows Active-Directory via IAS).
       - Release 1.2.2 
       - Changed role for example-files to doc
       - Removed deprecated files
+      - Added IPv6 related attributes defined in RFC3162
       </notes>
     </release>
 

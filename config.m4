@@ -16,5 +16,5 @@ ulongint = 1;
     AC_DEFINE(HAVE_U_INT32_T, 1, [ ])
   ])
 
-  PHP_EXTENSION(radius, $ext_shared)
+ PHP_NEW_EXTENSION(radius, radius.c radlib.c, $ext_shared)
 fi
