@@ -25,17 +25,16 @@ OS (for example against Windows Active-Directory via IAS).
   <license>BSD</license>
 
    <release>
-      <version>1.2.2</version>
-      <date>2003-07-17</date>
+      <version>1.2.3</version>
+      <date>2003-11-04</date>
       <state>stable</state>
       <notes>
-      - Release 1.2.2 
-      - Changed role for example-files to doc
-      - Removed deprecated files
-      - Added IPv6 related attributes defined in RFC3162
+      - Release 1.2.3
+      - Fixed a typo in radius_init_const wich caused RADIUS_ACCT_STATUS_TYPE to be undefined.
+      - Re-added Makefile.in
       </notes>
     </release>
-    
+
   <filelist>
     <dir role="src" name="/">
       <file>CREDITS</file>
@@ -64,6 +63,17 @@ OS (for example against Windows Active-Directory via IAS).
   </filelist>
    
   <changelog>
+
+   <release>
+      <version>1.2.3</version>
+      <date>2003-11-04</date>
+      <state>stable</state>
+      <notes>
+      - Release 1.2.3
+      - Fixed a typo in radius_init_const.h wich caused RADIUS_ACCT_STATUS_TYPE to be undefined.
+      - Re-added Makefile.in
+      </notes>
+    </release>
 
    <release>
       <version>1.2.2</version>
