@@ -7,14 +7,14 @@ dnl without editing.
 
 dnl If your extension references something external, use with:
 
-PHP_ARG_WITH(radius, for radius support,
-[  --with-radius             Include radius support])
+dnl PHP_ARG_WITH(radius, for radius support,
+dnl [  --with-radius             Include radius support])
 
 dnl Otherwise use enable:
 
-dnl PHP_ARG_ENABLE(radius, whether to enable radius support,
+PHP_ARG_ENABLE(radius, whether to enable radius support,
 dnl Make sure that the comment is aligned:
-dnl [  --enable-radius           Enable radius support])
+[  --enable-radius           Enable radius support])
 
 if test "$PHP_RADIUS" != "no"; then
   dnl Write more examples of tests here...
