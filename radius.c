@@ -31,8 +31,6 @@ any other GPL-like (LGPL, GPL2) License.
     $Id$
 */
 
-#include "rsaref.h"
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -173,7 +171,6 @@ PHP_FUNCTION(radius_auth_open)
 
 	raddesc = emalloc(sizeof(radius_descriptor));
 	raddesc->radh = rad_auth_open();
-	raddesc->request_created = 0;
 
 	if (raddesc->radh != NULL) {
 		ZEND_REGISTER_RESOURCE(return_value, raddesc, le_radius);
@@ -191,7 +188,6 @@ PHP_FUNCTION(radius_acct_open)
 
 	raddesc = emalloc(sizeof(radius_descriptor));
 	raddesc->radh = rad_acct_open();
-	raddesc->request_created = 0;
 
 	if (raddesc->radh != NULL) {
 		ZEND_REGISTER_RESOURCE(return_value, raddesc, le_radius);
@@ -299,7 +295,6 @@ PHP_FUNCTION(radius_create_request)
 	if (rad_create_request(raddesc->radh, code) == -1) {
 		RETURN_FALSE;
 	} else {
-		raddesc->request_created = 1;
 		RETURN_TRUE;
 	}
 }
