@@ -12,7 +12,7 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author:                                                              |
+  | Author: Michael Bretterklieber <mbretter@bretterklieber.com>         |
   +----------------------------------------------------------------------+
 
   $Id$ 
@@ -39,10 +39,10 @@
 extern zend_module_entry radius_module_entry;
 
 typedef struct {
-	int id;
- 	short request_created;
- 	char errmsg[ERRSIZE];
-	struct rad_handle *radh;
+    int id;
+    short request_created;
+    char errmsg[ERRSIZE];
+    struct rad_handle *radh;
 } radius_descriptor;
 
 PHP_MINIT_FUNCTION(radius);
@@ -85,7 +85,7 @@ ZEND_BEGIN_MODULE_GLOBALS(radius)
 ZEND_END_MODULE_GLOBALS(radius)
 */
 
-/* In every utility function you add that needs to use variables 
+/* In every utility function you add that needs to use variables
    in php_radius_globals, call TSRM_FETCH(); after declaring other 
    variables used by that function, or better yet, pass in TSRMG_CC
    after the last function argument and declare your utility function

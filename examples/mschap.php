@@ -1,7 +1,39 @@
 <?php
 /*
+Copyright (c) 2002, Michael Bretterklieber <michael@bretterklieber.com>
+All rights reserved.
+ 
+Redistribution and use in source and binary forms, with or without 
+modification, are permitted provided that the following conditions 
+are met:
+ 
+1. Redistributions of source code must retain the above copyright 
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright 
+   notice, this list of conditions and the following disclaimer in the 
+   documentation and/or other materials provided with the distribution.
+3. Neither the name Michael Bretterklieber nor the names of its contributors 
+   may be used to endorse or promote products derived from this software without 
+   specific prior written permission.
+ 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY 
+OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ 
+    $Id$
+*/
+
+/*
 $pass = 'MyPw';
 $challenge = GenerateChallenge();
+$challenge = pack('H*', '102DB5DF085D3041');
 echo bin2hex($challenge). "\n";
 $unipw = str2unicode($pass);
 echo bin2hex($unipw) . "\n";
@@ -9,14 +41,35 @@ $nthash = NtPasswordHash($pass);
 echo bin2hex($nthash) . "\n";
 $challresp = ChallengeResponse($nthash, $challenge);
 echo bin2hex($challresp) . "\n";
-
 echo "\n";*/
 
-function NtPasswordHash($plain) {
+/*
+$user = 'User';
+$pass = 'clientPass';
+ 
+echo bin2hex($user) . "\n";
+//$challenge = GenerateChallenge();
+$challenge = pack('H*', '5b5d7c7d7b3f2f3e3c2c602132262628');
+echo bin2hex($challenge). "\n";
+$peerChallenge = GenerateChallenge();
+$peerChallenge = pack('H*', '21402324255E262A28295F2B3A337C7E');
+echo bin2hex($peerChallenge). "\n";
+$unipw = str2unicode($pass);
+echo bin2hex($unipw) . "\n";
+$nthash = NtPasswordHash($pass);
+echo bin2hex($nthash) . "\n";
+$resp = GenerateNtResponse($peerChallenge, $challenge, $user, $pass);
+echo bin2hex($resp) . "\n";
+echo "\n";
+*/
+
+function NtPasswordHash($plain) 
+{
     return mhash (MHASH_MD4, str2unicode($plain));
 }
 
-function str2unicode($str) {
+function str2unicode($str) 
+{
 
     for ($i=0;$i<strlen($str);$i++) {
         $a = ord($str{$i}) << 8;
@@ -25,18 +78,19 @@ function str2unicode($str) {
     return pack('H*', $uni);
 }
 
-function GenerateChallenge() {
-    mt_srand(time());
-    
-//    return pack('H*', sprintf("%X%X", mt_rand(), mt_rand()));
-    return pack('H*', '102DB5DF085D3041');
+function GenerateChallenge() 
+{
+    mt_srand((double)microtime()*1000000);
+
+    return pack('H*', sprintf("%X%X", mt_rand(), mt_rand()));
 }
 
-function ChallengeResponse($nthash, $challenge) {
+function ChallengeResponse($challenge, $nthash) 
+{
     global $odd_parity;
 
-    while (strlen($nthash) < 21) $nthash .= "\0";
-    
+    while (strlen($nthash) < 21)
+        $nthash .= "\0";
     $td = mcrypt_module_open ('des', '', 'ecb', '');
     $iv = mcrypt_create_iv (mcrypt_enc_get_iv_size ($td), MCRYPT_RAND);
 
@@ -45,7 +99,7 @@ function ChallengeResponse($nthash, $challenge) {
     $resp1 = mcrypt_generic ($td, $challenge);
     mcrypt_generic_deinit ($td);
 
-    $k = DESAddParity(substr($nthash, 7, 7));   
+    $k = DESAddParity(substr($nthash, 7, 7));
     mcrypt_generic_init ($td, $k, $iv);
     $resp2 = mcrypt_generic ($td, $challenge);
     mcrypt_generic_deinit ($td);
@@ -55,12 +109,40 @@ function ChallengeResponse($nthash, $challenge) {
     $resp3 = mcrypt_generic ($td, $challenge);
     mcrypt_generic_deinit ($td);
 
-    mcrypt_module_close ($td);    
+    mcrypt_module_close ($td);
 
     return $resp1 . $resp2 . $resp3;
 }
 
-function DESAddParity($key) {
+// MS-CHAPv2
+
+function GeneratePeerChallenge() 
+{
+    mt_srand((double)microtime()*1000000);
+
+    return pack('H*', sprintf("%X%X%X%X", mt_rand(), mt_rand(), mt_rand(), mt_rand()));
+}
+
+function NtPasswordHashHash($hash) 
+{
+    return mhash (MHASH_MD4, $hash);
+}
+
+function ChallengeHash($challenge, $peerChallenge, $username) 
+{
+    return substr(mhash (MHASH_SHA1, $peerChallenge . $challenge . $username), 0, 8);
+}
+
+function GenerateNTResponse($challenge, $peerChallenge, $username, $password) 
+{
+    $challengeHash = ChallengeHash($challenge, $peerChallenge, $username);
+    $pwhash = NtPasswordHash($password);
+    return ChallengeResponse($challengeHash, $pwhash);
+}
+
+// DES helper function
+function DESAddParity($key) 
+{
 
     static $odd_parity = array(
         1,  1,  2,  2,  4,  4,  7,  7,  8,  8, 11, 11, 13, 13, 14, 14,
@@ -88,9 +170,8 @@ function DESAddParity($key) {
     foreach($str1 as $s) {
         $x .= sprintf('%02s', dechex($odd_parity[bindec($s . '0')]));
     }
-    
+
     return pack('H*', $x);
 
 }
-
 ?>
