@@ -7,12 +7,10 @@
   <name>radius</name>
   <summary>Radius client library</summary>
   <description>
-This package is based on the libradius of FreeBSD. This PECL adds full support for 
-Radius Authentication (RFC 2865) and Radius Accounting (RFC 2866). This package is 
-available for Unix (tested on FreeBSD and SuSE Linux 7.2) and for Windows.
-
-For install instructions see the manual at pear.php.net  
-
+This package is based on the libradius of FreeBSD, with some modifications and extensions. 
+This PECL provides full support for RADIUS authentication (RFC 2865) and RADIUS accounting (RFC 2866), 
+works on Unix and on Windows. Its an easy way to authenticate your users against the user-database of your 
+OS (for example against Windows Active-Directory via IAS).
   </description>
   
   <maintainers>
@@ -25,13 +23,33 @@ For install instructions see the manual at pear.php.net
   </maintainers>
   
   <license>PHP, BSD</license>
-  
+
+  <release>
+    <version>1.2</version>
+    <date>2003-01-11</date> 
+    <state>stable</state>
+    <notes>
+      - Release 1.2    
+      - BugFix: a to short challenge was generated sometimes (MS-CHAPv1, MS-CHAPv2)
+      - New functions:
+          radius_demangle: demangles radius passwords and mppe MS-CHAPv1 Keys
+          radius_demangle_mppe_key: demangles mppe send- and recvkey (MS-CHAPv2)
+      - Added examples for radius-accounting
+      - Replaced mcrypt-functions with own des-ecb-encryption function
+      - Some minor changes in radius-auth.php
+      - Added php-script for testing MS-CHAP functions    
+    </notes>
+  </release>
+    
   <release>
     <version>1.1</version>
     <date>2002-12-22</date> 
     <state>stable</state>
     <notes>
       - Release 1.1
+      - Fixed source code style
+      - added examples directory
+      - added examples for MS-CHAPv1 and MS-CHAPv2
     </notes>
   </release>
   
@@ -55,14 +73,34 @@ For install instructions see the manual at pear.php.net
       <file>radlib_private.h</file>                        
       <file>radlib_vs.h</file>
       <dir name="examples">
-        <file>radius.php</file>
+        <file>radius-auth.php</file>
+        <file>radius-acct.php</file>
+        <file>des.php</file>
         <file>mschap.php</file>
+        <file>mschaptest.php</file>
       </dir>
     </dir>
   </filelist>
    
   <changelog>
    
+    <release>
+      <version>1.2</version>
+      <date>2003-01-11</date>
+      <state>stable</state>
+      <notes>
+      - Release 1.2    
+      - BugFix: a to short challenge was generated sometimes (MS-CHAPv1, MS-CHAPv2)
+      - New functions:
+          radius_demangle: demangles radius passwords and mppe MS-CHAPv1 Keys
+          radius_demangle_mppe_key: demangles mppe send- and recvkey (MS-CHAPv2)
+      - Provide examples for radius-accounting
+      - Replaced mcrypt-functions with own des-ecb-encryption function
+      - Some minor changes in radius-auth.php
+      - Added php-script for testing MS-CHAP functions    
+      </notes>
+    </release>
+
     <release>
       <version>1.1</version>
       <date>2002-12-22</date>
