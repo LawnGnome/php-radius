@@ -1,21 +1,20 @@
 <?php
 /*
-Copyright (c) 2002-2003, Michael Bretterklieber <michael@bretterklieber.com>
+Copyright (c) 2003, Michael Bretterklieber <michael@bretterklieber.com>
 All rights reserved.
- 
+
 Redistribution and use in source and binary forms, with or without 
 modification, are permitted provided that the following conditions 
 are met:
- 
+
 1. Redistributions of source code must retain the above copyright 
    notice, this list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright 
    notice, this list of conditions and the following disclaimer in the 
    documentation and/or other materials provided with the distribution.
-3. Neither the name Michael Bretterklieber nor the names of its contributors 
-   may be used to endorse or promote products derived from this software without 
-   specific prior written permission.
- 
+3. The names of the authors may not be used to endorse or promote products 
+   derived from this software without specific prior written permission.
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
@@ -26,10 +25,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
 OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- 
+
 This code cannot simply be copied and put under the GNU Public License or 
 any other GPL-like (LGPL, GPL2) License.
- 
+
     $Id$
 */
 
@@ -50,14 +49,14 @@ foreach($functions as $func) echo $func . "<br>\n";
 
 $username = 'sepp';
 $password = 'sepp';
-//$radserver = 'localhost';
-$radserver = 'carlo.jawa.at';
+$radserver = 'localhost';
+//$radserver = 'carlo.jawa.at';
 $radport = 1812;
 $sharedsecret = 'testing123';
 //$auth_type = 'pap';
 //$auth_type = 'chap';
-$auth_type = 'mschapv1';
-//$auth_type = 'mschapv2';
+//$auth_type = 'mschapv1';
+$auth_type = 'mschapv2';
 
 $res = radius_auth_open();
 echo "$res<br>\n";
@@ -117,9 +116,10 @@ if ($auth_type == 'chap') {
     $chall = mt_rand();
 
     // FYI: CHAP = md5(ident + plaintextpass + challenge)
-    $chapval = md5(pack('Ca*',1 , $password . $chall));
+    $chapval = pack('H*', md5(pack('Ca*',1 , $password . $chall)));
+//    $chapval = md5(pack('Ca*',1 , $password . $chall));
     // Radius wants the CHAP Ident in the first byte of the CHAP-Password
-    $pass = pack('CH*', 1, $chapval);
+    $pass = pack('C', 1) . $chapval;
 
     if (!radius_put_attr($res, RADIUS_CHAP_PASSWORD, $pass)) {
         echo 'RadiusError: RADIUS_CHAP_PASSWORD:' . radius_strerror($res). "<br>\n";
@@ -160,10 +160,10 @@ if ($auth_type == 'chap') {
     echo "MS-CHAPv2<br>\n";
     include_once('mschap.php');
 
-    $challenge = GenerateChallenge();
-    printf ("Challenge:%s\n", bin2hex($challenge));
+    $authChallenge = GenerateChallenge(16);
+    printf ("Auth Challenge:%s\n", bin2hex($authChallenge));
 
-    if (!radius_put_vendor_attr($res, RADIUS_VENDOR_MICROSOFT, RADIUS_MICROSOFT_MS_CHAP_CHALLENGE, $challenge)) {
+    if (!radius_put_vendor_attr($res, RADIUS_VENDOR_MICROSOFT, RADIUS_MICROSOFT_MS_CHAP_CHALLENGE, $authChallenge)) {
         echo 'RadiusError: RADIUS_MICROSOFT_MS_CHAP_CHALLENGE:' . radius_strerror($res). "<br>\n";
         exit;
     }
@@ -172,7 +172,7 @@ if ($auth_type == 'chap') {
     $peerChallenge = GeneratePeerChallenge();
     printf ("Peer Challenge:%s\n", bin2hex($peerChallenge));
 
-    $ntresp = GenerateNTResponse($challenge, $peerChallenge, $username, $password);
+    $ntresp = GenerateNTResponse($authChallenge, $peerChallenge, $username, $password);
     $reserved = str_repeat ("\0", 8);
 
     printf ("NT Response:%s\n", bin2hex($ntresp));
@@ -181,7 +181,7 @@ if ($auth_type == 'chap') {
     printf ("Response:%d %s\n", strlen($resp), bin2hex($resp));
 
     if (!radius_put_vendor_attr($res, RADIUS_VENDOR_MICROSOFT, RADIUS_MICROSOFT_MS_CHAP2_RESPONSE, $resp)) {
-        echo 'RadiusError: RADIUS_MICROSOFT_MS_CHAP_RESPONSE:' . radius_strerror($res). "<br>\n";
+        echo 'RadiusError: RADIUS_MICROSOFT_MS_CHAP2_RESPONSE:' . radius_strerror($res). "<br>\n";
         exit;
     }
 
@@ -263,7 +263,7 @@ while ($resa = radius_get_attr($res)) {
         break;
 
     case RADIUS_IDLE_TIMEOUT:
-        $idletime = radius_cvt_int($idletime);
+        $idletime = radius_cvt_int($data);
         echo "Idle timeout: $idletime<br>\n";
         break;
 

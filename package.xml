@@ -22,22 +22,17 @@ OS (for example against Windows Active-Directory via IAS).
     </maintainer>
   </maintainers>
   
-  <license>PHP, BSD</license>
+  <license>BSD</license>
 
   <release>
-    <version>1.2</version>
-    <date>2003-01-11</date> 
+    <version>1.2.1</version>
+    <date>2003-01-26</date>
     <state>stable</state>
     <notes>
-      - Release 1.2    
-      - BugFix: a to short challenge was generated sometimes (MS-CHAPv1, MS-CHAPv2)
-      - New functions:
-          radius_demangle: demangles radius passwords and mppe MS-CHAPv1 Keys
-          radius_demangle_mppe_key: demangles mppe send- and recvkey (MS-CHAPv2)
-      - Added examples for radius-accounting
-      - Replaced mcrypt-functions with own des-ecb-encryption function
-      - Some minor changes in radius-auth.php
-      - Added php-script for testing MS-CHAP functions    
+    - Release 1.2.1   
+    - Change License to BSD
+    - BugFix: The MS-CHAPv2 Authenticator-Challenge has 16 Bytes and not 8 Bytes
+    - Generate better challenges 
     </notes>
   </release>
     
@@ -71,7 +66,19 @@ OS (for example against Windows Active-Directory via IAS).
   </filelist>
    
   <changelog>
-   
+
+    <release>
+      <version>1.2.1</version>
+      <date>2003-01-26</date>
+      <state>stable</state>
+      <notes>
+      - Release 1.2.1   
+      - Change License to BSD
+      - BugFix: The MS-CHAPv2 Authenticator-Challenge has 16 Bytes and not 8 Bytes
+      - Generate better challenges 
+      </notes>
+    </release>
+       
     <release>
       <version>1.2</version>
       <date>2003-01-11</date>
