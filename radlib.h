@@ -78,11 +78,11 @@
 #define RAD_LOGIN_IP_HOST		14	/* IP address */
 #define RAD_LOGIN_SERVICE		15	/* Integer */
 #define RAD_LOGIN_TCP_PORT		16	/* Integer */
-     /* unassiged			17 */
+	/* unassiged			17 */
 #define RAD_REPLY_MESSAGE		18	/* String */
 #define RAD_CALLBACK_NUMBER		19	/* String */
 #define RAD_CALLBACK_ID			20	/* String */
-     /* unassiged			21 */
+	/* unassiged			21 */
 #define RAD_FRAMED_ROUTE		22	/* String */
 #define RAD_FRAMED_IPX_NETWORK		23	/* IP address */
 #define RAD_STATE			24	/* String */
@@ -101,7 +101,7 @@
 #define RAD_FRAMED_APPLETALK_LINK	37	/* Integer */
 #define RAD_FRAMED_APPLETALK_NETWORK	38	/* Integer */
 #define RAD_FRAMED_APPLETALK_ZONE	39	/* Integer */
-     /* reserved for accounting		40-59 */
+	/* reserved for accounting		40-59 */
 #define RAD_CHAP_CHALLENGE		60	/* String */
 #define RAD_NAS_PORT_TYPE		61	/* Integer */
 	#define RAD_ASYNC			0
@@ -146,66 +146,53 @@
 #define RAD_ACCT_INPUT_PACKETS		47	/* Integer */
 #define RAD_ACCT_OUTPUT_PACKETS		48	/* Integer */
 #define RAD_ACCT_TERMINATE_CAUSE	49	/* Integer */
-        #define RAD_TERM_USER_REQUEST		1
-        #define RAD_TERM_LOST_CARRIER		2
-        #define RAD_TERM_LOST_SERVICE		3
-        #define RAD_TERM_IDLE_TIMEOUT		4
-        #define RAD_TERM_SESSION_TIMEOUT	5
-        #define RAD_TERM_ADMIN_RESET		6
-        #define RAD_TERM_ADMIN_REBOOT		7
-        #define RAD_TERM_PORT_ERROR		8
-        #define RAD_TERM_NAS_ERROR		9
-        #define RAD_TERM_NAS_REQUEST		10
-        #define RAD_TERM_NAS_REBOOT		11
-        #define RAD_TERM_PORT_UNNEEDED		12
-        #define RAD_TERM_PORT_PREEMPTED		13
-        #define RAD_TERM_PORT_SUSPENDED		14
-        #define RAD_TERM_SERVICE_UNAVAILABLE    15
-        #define RAD_TERM_CALLBACK		16
-        #define RAD_TERM_USER_ERROR		17
-        #define RAD_TERM_HOST_REQUEST		18
+	#define RAD_TERM_USER_REQUEST		1
+	#define RAD_TERM_LOST_CARRIER		2
+	#define RAD_TERM_LOST_SERVICE		3
+	#define RAD_TERM_IDLE_TIMEOUT		4
+	#define RAD_TERM_SESSION_TIMEOUT	5
+	#define RAD_TERM_ADMIN_RESET		6
+	#define RAD_TERM_ADMIN_REBOOT		7
+	#define RAD_TERM_PORT_ERROR		8
+	#define RAD_TERM_NAS_ERROR		9
+	#define RAD_TERM_NAS_REQUEST		10
+	#define RAD_TERM_NAS_REBOOT		11
+	#define RAD_TERM_PORT_UNNEEDED		12
+	#define RAD_TERM_PORT_PREEMPTED		13
+	#define RAD_TERM_PORT_SUSPENDED		14
+	#define RAD_TERM_SERVICE_UNAVAILABLE    15
+	#define RAD_TERM_CALLBACK		16
+	#define RAD_TERM_USER_ERROR		17
+	#define RAD_TERM_HOST_REQUEST		18
 #define	RAD_ACCT_MULTI_SESSION_ID	50	/* String */
 #define	RAD_ACCT_LINK_COUNT		51	/* Integer */
 
 struct rad_handle;
 struct timeval;
 
-#ifndef PHP_WIN32
-__BEGIN_DECLS
-#endif
 struct rad_handle	*rad_acct_open(void);
-int			 rad_add_server(struct rad_handle *,
-			    const char *, int, const char *, int, int);
+int			 rad_add_server(struct rad_handle *, 
+				const char *, int, const char *, int, int);
 struct rad_handle	*rad_auth_open(void);
 void			 rad_close(struct rad_handle *);
 int			 rad_config(struct rad_handle *, const char *);
-int			 rad_continue_send_request(struct rad_handle *, int,
-			    int *, struct timeval *);
+int			 rad_continue_send_request(struct rad_handle *, 
+				int, int *, struct timeval *);
 int			 rad_create_request(struct rad_handle *, int);
 struct in_addr		 rad_cvt_addr(const void *);
 u_int32_t		 rad_cvt_int(const void *);
 char			*rad_cvt_string(const void *, size_t);
-int			 rad_get_attr(struct rad_handle *, const void **,
-			    size_t *);
-int			 rad_init_send_request(struct rad_handle *, int *,
-			    struct timeval *);
+int			 rad_get_attr(struct rad_handle *, const void **, size_t *);
+int			 rad_init_send_request(struct rad_handle *, int *, struct timeval *);
 struct rad_handle	*rad_open(void);  /* Deprecated, == rad_auth_open */
 int			 rad_put_addr(struct rad_handle *, int, struct in_addr);
-int			 rad_put_attr(struct rad_handle *, int,
-			    const void *, size_t);
+int			 rad_put_attr(struct rad_handle *, int, const void *, size_t);
 int			 rad_put_int(struct rad_handle *, int, u_int32_t);
-int			 rad_put_string(struct rad_handle *, int,
-			    const char *);
-ssize_t			 rad_request_authenticator(struct rad_handle *, char *,
-			    size_t);
+int			 rad_put_string(struct rad_handle *, int, const char *);
+ssize_t			 rad_request_authenticator(struct rad_handle *, char *, size_t);
 int			 rad_send_request(struct rad_handle *);
 const char		*rad_server_secret(struct rad_handle *);
 const char		*rad_strerror(struct rad_handle *);
-int			 rad_demangle(struct rad_handle *,
-			    const void *, size_t, u_char *);
-
-#ifndef PHP_WIN32
-__END_DECLS
-#endif
+int			 rad_demangle(struct rad_handle *, const void *, size_t, u_char *);
 
 #endif /* _RADLIB_H_ */
