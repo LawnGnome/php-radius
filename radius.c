@@ -73,6 +73,8 @@ function_entry radius_functions[] = {
     PHP_FE(radius_cvt_string,	NULL)
     PHP_FE(radius_request_authenticator,	NULL)
     PHP_FE(radius_server_secret,	NULL)
+    PHP_FE(radius_demangle,	NULL)    
+    PHP_FE(radius_demangle_mppe_key,	NULL)    
     {NULL, NULL, NULL}	/* Must be the last line in radius_functions[] */
 };
 /* }}} */
@@ -132,6 +134,7 @@ PHP_MINIT_FUNCTION(radius)
     */
     le_radius = zend_register_list_destructors_ex(_radius_close, NULL, "rad_handle", module_number);
 	#include "radius_init_const.h"
+    REGISTER_LONG_CONSTANT("RADIUS_MPPE_KEY_LEN", MPPE_KEY_LEN, CONST_PERSISTENT);    
     return SUCCESS;
 }
 /* }}} */
@@ -712,6 +715,68 @@ PHP_FUNCTION(radius_server_secret)
 
     secret = (char *)rad_server_secret(raddesc->radh);
     RETURN_STRINGL(secret, strlen(secret), 1);
+}
+/* }}} */
+
+/* {{{ proto string radius_demangle(radh, mangled) */
+PHP_FUNCTION(radius_demangle)
+{
+    radius_descriptor *raddesc;
+    zval *z_radh;
+    const void *mangled;
+    unsigned char *buf;
+    size_t len;
+    int res;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_radh, &mangled, &len) == FAILURE) {
+        return;
+    }
+
+    ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
+
+    buf = emalloc(len);
+    res = rad_demangle(raddesc->radh, mangled, len, buf);
+
+    if (res == -1) {
+        efree(buf);
+        RETURN_FALSE;
+    } else {
+        RETVAL_STRINGL(buf, len, 1); 
+        efree(buf);
+        return;
+    }
+
+}
+/* }}} */
+
+/* {{{ proto string radius_demangle_mppe_key(radh, mangled) */
+PHP_FUNCTION(radius_demangle_mppe_key)
+{
+    radius_descriptor *raddesc;
+    zval *z_radh;
+    const void *mangled;
+    unsigned char *buf;
+    size_t len, dlen;
+    int res;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_radh, &mangled, &len) == FAILURE) {
+        return;
+    }
+
+    ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
+
+    buf = emalloc(len);
+    res = rad_demangle_mppe_key(raddesc->radh, mangled, len, buf, &dlen);
+
+    if (res == -1) {
+        efree(buf);
+        RETURN_FALSE;
+    } else {
+        RETVAL_STRINGL(buf, dlen, 1); 
+        efree(buf);
+        return;
+    }
+
 }
 /* }}} */
 

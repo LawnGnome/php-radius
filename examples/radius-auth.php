@@ -30,7 +30,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 This code cannot simply be copied and put under the GNU Public License or 
 any other GPL-like (LGPL, GPL2) License.
  
- 
     $Id$
 */
 
@@ -51,12 +50,13 @@ foreach($functions as $func) echo $func . "<br>\n";
 
 $username = 'sepp';
 $password = 'sepp';
+//$radserver = 'localhost';
 $radserver = 'carlo.jawa.at';
 $radport = 1812;
 $sharedsecret = 'testing123';
-$auth_type = 'pap';
+//$auth_type = 'pap';
 //$auth_type = 'chap';
-//$auth_type = 'mschapv1';
+$auth_type = 'mschapv1';
 //$auth_type = 'mschapv2';
 
 $res = radius_auth_open();
@@ -74,12 +74,32 @@ if (!radius_add_server($res, $radserver, $radport, $sharedsecret, 3, 3)) {
     exit;
 }
 
-if (!radius_add_server($res, '192.168.201.12', 1812, 'testing123', 3, 3)) {
+if (!radius_add_server($res, $radserver, $radport, 'testing123', 3, 3)) {
     echo 'RadiusError:' . radius_strerror($res). "\n<br>";
     exit;
 }
 
 if (!radius_create_request($res, RADIUS_ACCESS_REQUEST)) {
+    echo 'RadiusError:' . radius_strerror($res). "\n<br>";
+    exit;
+}
+
+if (!radius_put_string($res, RADIUS_NAS_IDENTIFIER, isset($HTTP_HOST) ? $HTTP_HOST : 'localhost'))  {
+    echo 'RadiusError:' . radius_strerror($res). "\n<br>";
+    exit;
+}
+ 
+if (!radius_put_int($res, RADIUS_SERVICE_TYPE, RADIUS_FRAMED)) {
+    echo 'RadiusError:' . radius_strerror($res). "\n<br>";
+    exit;
+}
+  
+if (!radius_put_int($res, RADIUS_FRAMED_PROTOCOL, RADIUS_PPP)) {
+    echo 'RadiusError:' . radius_strerror($res). "\n<br>";
+    exit;
+}
+
+if (!radius_put_string($res, RADIUS_CALLING_STATION_ID, isset($REMOTE_HOST) ? $REMOTE_HOST : '127.0.0.1') == -1) {
     echo 'RadiusError:' . radius_strerror($res). "\n<br>";
     exit;
 }
@@ -238,7 +258,13 @@ while ($resa = radius_get_attr($res)) {
 
     case RADIUS_SESSION_TIMEOUT:
         $time = radius_cvt_int($data);
-        echo "Compression: $time<br>\n";
+        echo "Session timeout: $time<br>\n";
+        ini_set('max_execution_time', $time);
+        break;
+
+    case RADIUS_IDLE_TIMEOUT:
+        $idletime = radius_cvt_int($idletime);
+        echo "Idle timeout: $idletime<br>\n";
         break;
 
     case RADIUS_SERVICE_TYPE:
@@ -280,7 +306,8 @@ while ($resa = radius_get_attr($res)) {
                 switch ($attrv) {
 
                 case RADIUS_MICROSOFT_MS_CHAP2_SUCCESS:
-                    echo "MS CHAPv2 succeeded<br>\n";
+                    $mschap2resp = radius_cvt_string($datav);
+                    printf ("MS CHAPv2 success: %s<br>\n", $mschap2resp);                    
                     break;
 
                 case RADIUS_MICROSOFT_MS_CHAP_ERROR:
@@ -304,15 +331,25 @@ while ($resa = radius_get_attr($res)) {
                     break;
 
                 case RADIUS_MICROSOFT_MS_CHAP_MPPE_KEYS:
-                    printf ("MS MPPE Keys: %s<br>\n", bin2hex($datav));
+                    $demangled = radius_demangle($res, $datav);
+                    $lmkey = substr($demangled, 0, 8);
+                    $ntkey = substr($demangled, 8, RADIUS_MPPE_KEY_LEN);
+                    printf ("MS MPPE Keys: LM-Key: %s NT-Key: %s<br>\n", bin2hex($lmkey), bin2hex($ntkey));
                     break;
 
                 case RADIUS_MICROSOFT_MS_MPPE_SEND_KEY:
-                    printf ("MS MPPE Send Key: %s<br>\n", bin2hex($datav));
+                    $demangled = radius_demangle_mppe_key($res, $datav);
+                    printf ("MS MPPE Send Key: %s<br>\n", bin2hex($demangled));
                     break;
 
                 case RADIUS_MICROSOFT_MS_MPPE_RECV_KEY:
-                    printf ("MS MPPE Send Key: %s<br>\n", bin2hex($datav));
+                    $demangled = radius_demangle_mppe_key($res, $datav);
+                    printf ("MS MPPE Send Key: %s<br>\n", bin2hex($demangled));
+                    break;
+
+                case RADIUS_MICROSOFT_MS_PRIMARY_DNS_SERVER:
+                    $server = radius_cvt_string($datav);
+                    printf ("MS Primary DNS Server: %s<br>\n", $server);
                     break;
 
                 default:

@@ -25,6 +25,8 @@
 #include "ext/standard/php_rand.h"
 #include "ext/standard/php_standard.h"
 
+#define MPPE_KEY_LEN    16
+
 #ifdef PHP_WIN32
 typedef unsigned int u_int32_t;
 typedef long ssize_t;

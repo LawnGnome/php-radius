@@ -80,6 +80,7 @@ struct rad_handle {
 	int		 ident;		/* Current identifier value */
 	char		 errmsg[ERRSIZE];	/* Most recent error message */
 	unsigned char	 request[MSGSIZE];	/* Request to send */
+	char	 	 request_created;	/* rad_create_request() called? */        
 	int		 req_len;	/* Length of request */
 	char		 pass[PASSSIZE];	/* Cleartext password */
 	int		 pass_len;	/* Length of cleartext password */

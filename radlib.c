@@ -535,6 +535,7 @@ rad_create_request(struct rad_handle *h, int code)
 		h->request[POS_AUTH+i+1] = (unsigned char) (r >> 8);
 	}
 	h->req_len = POS_ATTRS;
+    h->request_created = 1;    
 	clear_password(h);
 	return 0;
 }
@@ -697,6 +698,7 @@ rad_auth_open(void)
 		h->pass_pos = 0;
 		h->chap_pass = 0;
 		h->type = RADIUS_AUTH;
+        h->request_created = 0;        
 	}
 	return h;
 }
@@ -728,6 +730,11 @@ int
 rad_put_attr(struct rad_handle *h, int type, const void *value, size_t len)
 {
 	int result;
+
+    if (!h->request_created) {
+        generr(h, "Please call rad_create_request()");
+        return -1;
+    }
 
 	if (type == RAD_USER_PASSWORD)
 		result = put_password_attr(h, type, value, len);
@@ -917,6 +924,11 @@ rad_put_vendor_attr(struct rad_handle *h, int vendor, int type,
 {
 	struct vendor_attribute *attr;
 	int res;
+    
+    if (!h->request_created) {
+        generr(h, "Please call rad_create_request()");
+        return -1;
+    }    
 
 	if ((attr = malloc(len + 6)) == NULL) {
 		generr(h, "malloc failure (%d bytes)", len + 6);
@@ -969,4 +981,124 @@ const char *
 rad_server_secret(struct rad_handle *h)
 {
 	return (h->servers[h->srv].secret);
+}
+
+int
+rad_demangle(struct rad_handle *h, const void *mangled, size_t mlen, u_char *demangled) 
+{
+	char R[LEN_AUTH];
+	const char *S;
+	int i, Ppos;
+	MD5_CTX Context;
+	u_char b[16], *C;
+
+	if ((mlen % 16 != 0) || (mlen > 128)) {
+		generr(h, "Cannot interpret mangled data of length %ld", (u_long)mlen);
+		return -1;
+	}
+
+	C = (u_char *)mangled;
+
+	/* We need the shared secret as Salt */
+	S = rad_server_secret(h);
+
+	/* We need the request authenticator */
+	if (rad_request_authenticator(h, R, sizeof R) != LEN_AUTH) {
+		generr(h, "Cannot obtain the RADIUS request authenticator");
+                return -1;
+	}
+
+	MD5Init(&Context);
+	MD5Update(&Context, S, strlen(S));
+	MD5Update(&Context, R, LEN_AUTH);
+	MD5Final(b, &Context);
+	Ppos = 0;
+	while (mlen) {
+
+		mlen -= 16;
+		for (i = 0; i < 16; i++)
+			demangled[Ppos++] = C[i] ^ b[i];
+
+		if (mlen) {
+			MD5Init(&Context);
+			MD5Update(&Context, S, strlen(S));
+			MD5Update(&Context, C, 16);
+			MD5Final(b, &Context);
+		}
+
+		C += 16;
+	}
+
+	return 0;
+}
+
+int
+rad_demangle_mppe_key(struct rad_handle *h, const void *mangled, size_t mlen, u_char *demangled, size_t *len)
+{
+	char R[LEN_AUTH];    /* variable names as per rfc2548 */
+	const char *S;
+	u_char b[16];
+	const u_char *A, *C;
+	MD5_CTX Context;
+	int Slen, i, Clen, Ppos;
+	u_char *P;
+
+	if (mlen % 16 != SALT_LEN) {
+		generr(h, "Cannot interpret mangled data of length %ld", (u_long)mlen);
+		return -1;
+	}
+
+	/* We need the RADIUS Request-Authenticator */
+	if (rad_request_authenticator(h, R, sizeof R) != LEN_AUTH) {
+		generr(h, "Cannot obtain the RADIUS request authenticator");
+		return -1;
+	}
+
+	A = (const u_char *)mangled;      /* Salt comes first */
+	C = (const u_char *)mangled + SALT_LEN;  /* Then the ciphertext */
+	Clen = mlen - SALT_LEN;
+	S = rad_server_secret(h);    /* We need the RADIUS secret */
+	Slen = strlen(S);
+	P = alloca(Clen);        /* We derive our plaintext */
+
+	MD5Init(&Context);
+	MD5Update(&Context, S, Slen);
+	MD5Update(&Context, R, LEN_AUTH);
+	MD5Update(&Context, A, SALT_LEN);
+	MD5Final(b, &Context);
+	Ppos = 0;
+
+	while (Clen) {
+		Clen -= 16;
+
+		for (i = 0; i < 16; i++)
+		    P[Ppos++] = C[i] ^ b[i];
+
+		if (Clen) {
+			MD5Init(&Context);
+			MD5Update(&Context, S, Slen);
+			MD5Update(&Context, C, 16);
+			MD5Final(b, &Context);
+		}
+                
+		C += 16;
+	}
+
+	/*
+	* The resulting plain text consists of a one-byte length, the text and
+	* maybe some padding.
+	*/
+	*len = *P;
+	if (*len > mlen - 1) {
+		generr(h, "Mangled data seems to be garbage %d %d", *len, mlen-1);        
+		return -1;
+	}
+
+	if (*len > MPPE_KEY_LEN) {
+		generr(h, "Key to long (%d) for me max. %d", *len, MPPE_KEY_LEN);        
+		return -1;
+	}
+
+	memcpy(demangled, P + 1, *len);
+	return 0;
 }

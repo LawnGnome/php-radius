@@ -201,6 +201,9 @@ ssize_t			 rad_request_authenticator(struct rad_handle *, char *,
 int			 rad_send_request(struct rad_handle *);
 const char		*rad_server_secret(struct rad_handle *);
 const char		*rad_strerror(struct rad_handle *);
+int			 rad_demangle(struct rad_handle *,
+			    const void *, size_t, u_char *);
+
 #ifndef PHP_WIN32
 __END_DECLS
 #endif

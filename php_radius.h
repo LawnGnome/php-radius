@@ -74,6 +74,8 @@ PHP_FUNCTION(radius_cvt_int);
 PHP_FUNCTION(radius_cvt_string);
 PHP_FUNCTION(radius_request_authenticator);
 PHP_FUNCTION(radius_server_secret);
+PHP_FUNCTION(radius_demangle);
+PHP_FUNCTION(radius_demangle_mppe_key);
 
 /*
   	Declare any global variables you may need between the BEGIN
