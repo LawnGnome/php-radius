@@ -9,9 +9,10 @@
   <description>
 This package is based on the libradius of FreeBSD. This PECL adds full support for 
 Radius Authentication (RFC 2865) and Radius Accounting (RFC 2866). This package is 
-available for Unix (tested on FreeBSD and SuSe Linux 7.2) and for Windows.
+available for Unix (tested on FreeBSD and SuSE Linux 7.2) and for Windows.
 
 For install instructions see the manual at pear.php.net  
+
   </description>
   
   <maintainers>
@@ -26,12 +27,11 @@ For install instructions see the manual at pear.php.net
   <license>PHP</license>
   
   <release>
-    <version>0.9</version>
-    <date>2002-12-11</date> 
+    <version>1.0</version>
+    <date>2002-12-17</date> 
     <state>beta</state>
     <notes>
-      - Fully functional
-      - Only some minor changes are needed for the final release
+      - Release 1.0
     </notes>
   </release>
   
@@ -39,7 +39,6 @@ For install instructions see the manual at pear.php.net
   <filelist>
     <dir role="src" name="/">
         <file>CREDITS</file>
-        <file>README</file>
         <file>Makefile.in</file>
         <file>config.m4</file>
         <file>libs.mk</file>
