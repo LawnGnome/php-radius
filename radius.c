@@ -102,8 +102,8 @@ zend_module_entry radius_module_entry = {
 	radius_functions,
 	PHP_MINIT(radius),
 	PHP_MSHUTDOWN(radius),
-	PHP_RINIT(radius),      /* Replace with NULL if there's nothing to do at request start */
-	PHP_RSHUTDOWN(radius),  /* Replace with NULL if there's nothing to do at request end */
+	NULL,
+	NULL,
 	PHP_MINFO(radius),
 #if ZEND_MODULE_API_NO >= 20010901
 	"1.1", /* Replace with version number for your extension */
@@ -121,7 +121,7 @@ ZEND_GET_MODULE(radius)
 PHP_MINIT_FUNCTION(radius)
 {
 	le_radius = zend_register_list_destructors_ex(_radius_close, NULL, "rad_handle", module_number);
-	#include "radius_init_const.h"
+#include "radius_init_const.h"
 	REGISTER_LONG_CONSTANT("RADIUS_MPPE_KEY_LEN", MPPE_KEY_LEN, CONST_PERSISTENT);    
 	return SUCCESS;
 }
@@ -132,24 +132,6 @@ PHP_MINIT_FUNCTION(radius)
 PHP_MSHUTDOWN_FUNCTION(radius)
 {
 	return SUCCESS;
-}
-/* }}} */
-
-/* Remove if there's nothing to do at request start */
-/* {{{ PHP_RINIT_FUNCTION
- */
-PHP_RINIT_FUNCTION(radius)
-{
-    return SUCCESS;
-}
-/* }}} */
-
-/* Remove if there's nothing to do at request end */
-/* {{{ PHP_RSHUTDOWN_FUNCTION
- */
-PHP_RSHUTDOWN_FUNCTION(radius)
-{
-    return SUCCESS;
 }
 /* }}} */
 
@@ -541,10 +523,7 @@ PHP_FUNCTION(radius_get_attr)
 	} else {
 		if (res > 0) {
 
-			if(array_init(return_value) != SUCCESS) {
-				zend_error(E_WARNING, "Could not initialize array");
-				RETURN_FALSE;
-			}
+			array_init(return_value);
 			add_assoc_long(return_value, "attr", res);
 			add_assoc_stringl(return_value, "data", (char *) data, len, 1);
 			return;
@@ -570,10 +549,7 @@ PHP_FUNCTION(radius_get_vendor_attr)
 		RETURN_FALSE;
 	} else {
 
-		if(array_init(return_value) != SUCCESS) {
-			zend_error(E_WARNING, "Could not initialize array");
-			RETURN_FALSE;
-		}
+		array_init(return_value);
 		add_assoc_long(return_value, "attr", res);
 		add_assoc_long(return_value, "vendor", vendor);
 		add_assoc_stringl(return_value, "data", (char *) data, len, 1);

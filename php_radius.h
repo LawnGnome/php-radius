@@ -58,8 +58,6 @@ typedef struct {
 
 PHP_MINIT_FUNCTION(radius);
 PHP_MSHUTDOWN_FUNCTION(radius);
-PHP_RINIT_FUNCTION(radius);
-PHP_RSHUTDOWN_FUNCTION(radius);
 PHP_MINFO_FUNCTION(radius);
 
 PHP_FUNCTION(radius_auth_open);
