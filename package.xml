@@ -24,17 +24,21 @@ OS (for example against Windows Active-Directory via IAS).
   
   <license>BSD</license>
 
-  <release>
-    <version>1.2.1</version>
-    <date>2003-01-26</date>
-    <state>stable</state>
-    <notes>
-    - Release 1.2.1   
-    - Change License to BSD
-    - BugFix: The MS-CHAPv2 Authenticator-Challenge has 16 Bytes and not 8 Bytes
-    - Generate better challenges 
-    </notes>
-  </release>
+    <release>
+      <version>1.2.1</version>
+      <date>2003-05-02</date>
+      <state>stable</state>
+      <notes>
+      - Release 1.2.1   
+      - Change License to BSD
+      - BugFix: The MS-CHAPv2 Authenticator-Challenge has 16 Bytes and not 8 Bytes
+      - BugFix: build under Solaris
+      - Generate better challenges
+      - Many source-code-style fixes
+      - Removed unneeded sources
+      - Some cleanup's
+      </notes>
+    </release>
     
   <filelist>
     <dir role="src" name="/">
@@ -69,13 +73,17 @@ OS (for example against Windows Active-Directory via IAS).
 
     <release>
       <version>1.2.1</version>
-      <date>2003-01-26</date>
+      <date>2003-05-02</date>
       <state>stable</state>
       <notes>
       - Release 1.2.1   
       - Change License to BSD
       - BugFix: The MS-CHAPv2 Authenticator-Challenge has 16 Bytes and not 8 Bytes
-      - Generate better challenges 
+      - BugFix: build under Solaris
+      - Generate better challenges
+      - Many source-code-style fixes
+      - Removed unneeded sources
+      - Some cleanup's
       </notes>
     </release>
        
