@@ -4,7 +4,7 @@
 <package>
 
 
-  <name>radius</name>
+  <name>Net_Radius</name>
   <summary>Radius client library</summary>
   <description>
 This package is based on the libradius of FreeBSD. This PECL adds full support for 
