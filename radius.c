@@ -239,7 +239,8 @@ PHP_FUNCTION(radius_config)
 PHP_FUNCTION(radius_add_server)
 {
 	char *hostname, *secret;
-	int hostname_len, secret_len, port, timeout, maxtries;
+	int hostname_len, secret_len;
+	long  port, timeout, maxtries;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 
@@ -286,7 +287,8 @@ PHP_FUNCTION(radius_create_request)
 PHP_FUNCTION(radius_put_string)
 {
 	char *str;
-	int str_len, type;
+	int str_len;
+	long type;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 
@@ -308,8 +310,7 @@ PHP_FUNCTION(radius_put_string)
 /* {{{ proto bool radius_put_int(desc, type, int) */
 PHP_FUNCTION(radius_put_int)
 {
-	int type;
-	unsigned int val;
+	long type, val;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 
@@ -331,7 +332,8 @@ PHP_FUNCTION(radius_put_int)
 /* {{{ proto bool radius_put_attr(desc, type, data) */
 PHP_FUNCTION(radius_put_attr)
 {
-	int type, len;
+	long type;
+	int len;
 	char *data;
 	radius_descriptor *raddesc;
 	zval *z_radh;
@@ -355,7 +357,8 @@ PHP_FUNCTION(radius_put_attr)
 /* {{{ proto bool radius_put_addr(desc, type, addr) */
 PHP_FUNCTION(radius_put_addr)
 {
-	int type, addrlen;
+	int addrlen;
+	long type;
 	char	*addr;
 	radius_descriptor *raddesc;
 	zval *z_radh;
@@ -385,7 +388,8 @@ PHP_FUNCTION(radius_put_addr)
 PHP_FUNCTION(radius_put_vendor_string)
 {
 	char *str;
-	int str_len, type, vendor;
+	int str_len;
+	long type, vendor;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 
@@ -407,8 +411,7 @@ PHP_FUNCTION(radius_put_vendor_string)
 /* {{{ proto bool radius_put_vendor_int(desc, vendor, type, int) */
 PHP_FUNCTION(radius_put_vendor_int)
 {
-	int type, vendor;
-	unsigned int val;
+	long type, vendor, val;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 
@@ -430,7 +433,8 @@ PHP_FUNCTION(radius_put_vendor_int)
 /* {{{ proto bool radius_put_vendor_attr(desc, vendor, type, data) */
 PHP_FUNCTION(radius_put_vendor_attr)
 {
-	int type, len, vendor;
+	long type, vendor;
+	int len;
 	char *data;
 	radius_descriptor *raddesc;
 	zval *z_radh;
@@ -453,7 +457,8 @@ PHP_FUNCTION(radius_put_vendor_attr)
 /* {{{ proto bool radius_put_vendor_addr(desc, vendor, type, addr) */
 PHP_FUNCTION(radius_put_vendor_addr)
 {
-	int type, addrlen, vendor;
+	long type, vendor;
+	int addrlen;
 	char	*addr;
 	radius_descriptor *raddesc;
 	zval *z_radh;

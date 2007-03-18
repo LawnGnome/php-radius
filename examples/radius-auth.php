@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (c) 2003, Michael Bretterklieber <michael@bretterklieber.com>
+Copyright (c) 2003-2007, Michael Bretterklieber <michael@bretterklieber.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without 
@@ -50,13 +50,12 @@ foreach($functions as $func) echo $func . "<br>\n";
 $username = 'sepp';
 $password = 'sepp';
 $radserver = 'localhost';
-//$radserver = 'carlo.jawa.at';
 $radport = 1812;
 $sharedsecret = 'testing123';
-//$auth_type = 'pap';
+$auth_type = 'pap';
 //$auth_type = 'chap';
 //$auth_type = 'mschapv1';
-$auth_type = 'mschapv2';
+//$auth_type = 'mschapv2';
 
 $res = radius_auth_open();
 echo "$res<br>\n";

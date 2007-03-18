@@ -44,9 +44,9 @@ if(!extension_loaded('radius')) {
 
 $username = 'sepp';
 $radserver = 'localhost';
-//$radserver = 'carlo.jawa.at';
 $radport = 1813;
 $starttime = time();
+$sharedsecret = 'testing123';
 
 if (!isset($REMOTE_ADDR)) $REMOTE_ADDR = '127.0.0.1';
 
@@ -61,11 +61,6 @@ echo "$res<br>\n";
 
 
 if (!radius_add_server($res, $radserver, $radport, $sharedsecret, 3, 3)) {
-    echo 'RadiusError:' . radius_strerror($res). "\n<br>";
-    exit;
-}
-
-if (!radius_add_server($res, $radserver, $radport, 'testing123', 3, 3)) {
     echo 'RadiusError:' . radius_strerror($res). "\n<br>";
     exit;
 }
