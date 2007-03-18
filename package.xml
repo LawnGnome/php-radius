@@ -1,166 +1,245 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- do not use the "Type" attribute here, that one is only for
-     generated package.xml files -->
-<package>
-
-
-  <name>radius</name>
-  <summary>Radius client library</summary>
-  <description>
-This package is based on the libradius of FreeBSD, with some modifications and extensions. 
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.4.11" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+http://pear.php.net/dtd/tasks-1.0.xsd
+http://pear.php.net/dtd/package-2.0
+http://pear.php.net/dtd/package-2.0.xsd">
+ <name>radius</name>
+ <channel>pecl.php.net</channel>
+ <summary>Radius client library</summary>
+ <description>This package is based on the libradius of FreeBSD, with some modifications and extensions. 
 This PECL provides full support for RADIUS authentication (RFC 2865) and RADIUS accounting (RFC 2866), 
 works on Unix and on Windows. Its an easy way to authenticate your users against the user-database of your 
 OS (for example against Windows Active-Directory via IAS).
-  </description>
   
-  <maintainers>
-    <maintainer>
-      <user>mbretter</user>
-      <name>Michael Bretterklieber</name>
-      <email>mbretter@php.net</email>
-      <role>lead</role>
-    </maintainer>
-  </maintainers>
-  
-  <license>BSD</license>
+ </description>
+ <lead>
+  <name>Michael Bretterklieber</name>
+  <user>mbretter</user>
+  <email>mbretter@php.net</email>
+  <active>yes</active>
+ </lead>
+ <date>2007-03-18</date>
+ <time>20:22:38</time>
+ <version>
+  <release>1.2.5</release>
+  <api>1.2.5</api>
+ </version>
+
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
+ <notes>
+- amd64 arch fixes
+
+ </notes>
+
+ <contents>
+  <dir name="/">
+   <dir name="examples">
+    <file name="des.php" role="doc" />
+    <file name="mschap.php" role="doc" />
+    <file name="mschaptest.php" role="doc" />
+    <file name="radius-acct.php" role="doc" />
+    <file name="radius-auth.php" role="doc" />
+   </dir> <!-- //examples -->
+   <file name="config.m4" role="src" />
+   <file name="CREDITS" role="src" />
+   <file name="Makefile.in" role="src" />
+   <file name="php_radius.h" role="src" />
+   <file name="radius.c" role="src" />
+   <file name="radius.conf" role="src" />
+   <file name="radius.dsp" role="src" />
+   <file name="radius.dsw" role="src" />
+   <file name="radius_init_const.h" role="src" />
+   <file name="radlib.c" role="src" />
+   <file name="radlib.h" role="src" />
+   <file name="radlib_compat.c" role="src" />
+   <file name="radlib_compat.h" role="src" />
+   <file name="radlib_md5.h" role="src" />
+   <file name="radlib_private.h" role="src" />
+   <file name="radlib_vs.h" role="src" />
+  </dir> <!-- / -->
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>4.0.0</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.0b1</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+ <providesextension>radius</providesextension>
+ <extsrcrelease />
+ <changelog>
 
   <release>
-    <version>1.2.4</version>
-    <date>2003-11-17</date>
-    <state>stable</state>
-    <notes>
-    - Release 1.2.4
-    - Forgot including updated radius_init_const.h
-    </notes>
+   <version>
+    <release>1.2.5</release>
+    <api>1.2.5</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2007-03-18</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
+   <notes>- Release 1.2.5
+- amd64 arch fixes
+
+   </notes>
   </release>
 
-  <filelist>
-    <dir role="src" name="/">
-      <file>CREDITS</file>
-      <file>Makefile.in</file>
-      <file>config.m4</file>
-      <file>php_radius.h</file>
-      <file>radius.c</file>        
-      <file>radius.conf</file>
-      <file>radius.dsp</file>
-      <file>radius.dsw</file>
-      <file>radius_init_const.h</file>
-      <file>radlib.c</file>
-      <file>radlib.h</file>                        
-      <file>radlib_compat.c</file>        
-      <file>radlib_compat.h</file>
-      <file>radlib_md5.h</file>
-      <file>radlib_private.h</file>                        
-      <file>radlib_vs.h</file>
-      <dir name="examples" role="doc">
-        <file>radius-auth.php</file>
-        <file>radius-acct.php</file>
-        <file>des.php</file>
-        <file>mschap.php</file>
-        <file>mschaptest.php</file>
-      </dir>
-    </dir>
-  </filelist>
-   
-  <changelog>
+  <release>
+   <version>
+    <release>1.2.4</release>
+    <api>1.2.4</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2003-11-17</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
+   <notes>- Release 1.2.4
+- Forgot including updated radius_init_const.h
 
-   <release>
-      <version>1.2.4</version>
-      <date>2003-11-17</date>
-      <state>stable</state>
-      <notes>
-      - Release 1.2.4
-      - Forgot including updated radius_init_const.h
-      </notes>
-    </release>
+   </notes>
+  </release>
 
-   <release>
-      <version>1.2.3</version>
-      <date>2003-11-04</date>
-      <state>stable</state>
-      <notes>
-      - Release 1.2.3
-      - Fixed a typo in radius_init_const.h wich caused RADIUS_ACCT_STATUS_TYPE to be undefined.
-      - Re-added Makefile.in
-      </notes>
-    </release>
+  <release>
+   <version>
+    <release>1.2.3</release>
+    <api>1.2.3</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2003-11-04</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
+   <notes>- Release 1.2.3
+- Fixed a typo in radius_init_const.h wich caused RADIUS_ACCT_STATUS_TYPE to be undefined.
+- Re-added Makefile.in
 
-   <release>
-      <version>1.2.2</version>
-      <date>2003-07-17</date>
-      <state>stable</state>
-      <notes>
-      - Release 1.2.2 
-      - Changed role for example-files to doc
-      - Removed deprecated files
-      - Added IPv6 related attributes defined in RFC3162
-      </notes>
-    </release>
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>1.2.2</release>
+    <api>1.2.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2003-07-17</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
+   <notes>- Release 1.2.2 
+- Changed role for example-files to doc
+- Removed deprecated files
+- Added IPv6 related attributes defined in RFC3162
 
-    <release>
-      <version>1.2.1</version>
-      <date>2003-05-02</date>
-      <state>stable</state>
-      <notes>
-      - Release 1.2.1   
-      - Change License to BSD
-      - BugFix: The MS-CHAPv2 Authenticator-Challenge has 16 Bytes and not 8 Bytes
-      - BugFix: build under Solaris
-      - Generate better challenges
-      - Many source-code-style fixes
-      - Removed unneeded sources
-      - Some cleanup's
-      </notes>
-    </release>
-       
-    <release>
-      <version>1.2</version>
-      <date>2003-01-11</date>
-      <state>stable</state>
-      <notes>
-      - Release 1.2    
-      - BugFix: a to short challenge was generated sometimes (MS-CHAPv1, MS-CHAPv2)
-      - New functions:
-          radius_demangle: demangles radius passwords and mppe MS-CHAPv1 Keys
-          radius_demangle_mppe_key: demangles mppe send- and recvkey (MS-CHAPv2)
-      - Provide examples for radius-accounting
-      - Replaced mcrypt-functions with own des-ecb-encryption function
-      - Some minor changes in radius-auth.php
-      - Added php-script for testing MS-CHAP functions    
-      </notes>
-    </release>
+   </notes>
+  </release>
 
-    <release>
-      <version>1.1</version>
-      <date>2002-12-22</date>
-      <state>stable</state>
-      <notes>
-        - Release 1.1
-        - Fixed source code style
-        - added examples directory
-        - added examples for MS-CHAPv1 and MS-CHAPv2
-      </notes>
-    </release>
+  <release>
+   <version>
+    <release>1.2.1</release>
+    <api>1.2.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2003-05-02</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
+   <notes>- Release 1.2.1   
+- Change License to BSD
+- BugFix: The MS-CHAPv2 Authenticator-Challenge has 16 Bytes and not 8 Bytes
+- BugFix: build under Solaris
+- Generate better challenges
+- Many source-code-style fixes
+- Removed unneeded sources
+- Some cleanup&apos;s
 
-    <release>
-      <version>1.0</version>
-      <date>2002-12-17</date>
-      <state>stable</state>
-      <notes>
-        - Release 1.0
-      </notes>
-    </release>
+   </notes>
+  </release>
 
-    <release>
-      <version>0.9</version>
-      <date>2002-12-11</date> 
-      <state>beta</state>
-      <notes>
-    	 - Well tested under Linux, FreeBSD and Windows
-         - Must provide more examples
-      </notes>
-    </release>
-        
-  </changelog>
-  
+  <release>
+   <version>
+    <release>1.2</release>
+    <api>1.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2003-01-11</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
+   <notes>- Release 1.2    
+- BugFix: a to short challenge was generated sometimes (MS-CHAPv1, MS-CHAPv2)
+- New functions:
+    radius_demangle: demangles radius passwords and mppe MS-CHAPv1 Keys
+    radius_demangle_mppe_key: demangles mppe send- and recvkey (MS-CHAPv2)
+- Provide examples for radius-accounting
+- Replaced mcrypt-functions with own des-ecb-encryption function
+- Some minor changes in radius-auth.php
+- Added php-script for testing MS-CHAP functions    
+
+   </notes>
+  </release>
+
+  <release>
+   <version>
+    <release>1.1</release>
+    <api>1.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2002-12-22</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
+   <notes>- Release 1.1
+- Fixed source code style
+- added examples directory
+- added examples for MS-CHAPv1 and MS-CHAPv2
+   </notes>
+  </release>
+
+  <release>
+   <version>
+    <release>1.0</release>
+    <api>1.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2002-12-17</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
+   <notes>- Release 1.0
+   </notes>
+  </release>
+
+  <release>
+   <version>
+    <release>0.9</release>
+    <api>0.9</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2002-12-11</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
+   <notes>- Well tested under Linux, FreeBSD and Windows
+   </notes>
+  </release>
+
+ </changelog>
 </package>
