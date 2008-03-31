@@ -106,7 +106,7 @@ zend_module_entry radius_module_entry = {
 	NULL,
 	PHP_MINFO(radius),
 #if ZEND_MODULE_API_NO >= 20010901
-	"1.2.4", /* Replace with version number for your extension */
+	PHP_RADIUS_VERSION,
 #endif
 	STANDARD_MODULE_PROPERTIES
 };
@@ -140,8 +140,9 @@ PHP_MSHUTDOWN_FUNCTION(radius)
 PHP_MINFO_FUNCTION(radius)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "radius support", "enabled");
-	php_info_print_table_row(2, "Revision", "$Revision$");
+	php_info_print_table_header(2, "radius support", "enabled");
+	php_info_print_table_row(2, "version", PHP_RADIUS_VERSION);
+	php_info_print_table_row(2, "CVS revision", "$Revision$");
 	php_info_print_table_end();
 }
 /* }}} */

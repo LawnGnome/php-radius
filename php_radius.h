@@ -39,6 +39,8 @@ any other GPL-like (LGPL, GPL2) License.
 
 #define phpext_radius_ptr &radius_module_entry
 
+#define PHP_RADIUS_VERSION "1.2.6-dev"
+
 #ifdef PHP_WIN32
 #define PHP_RADIUS_API __declspec(dllexport)
 #else
