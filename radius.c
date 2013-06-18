@@ -542,15 +542,16 @@ PHP_FUNCTION(radius_get_attr)
 /* {{{ proto string radius_get_vendor_attr(data) */
 PHP_FUNCTION(radius_get_vendor_attr)
 {
-	int res, vendor;
+	int res;
 	const void *data;
 	int len;
+	u_int32_t vendor;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &len) == FAILURE) {
 		return;
 	}
 
-	res = rad_get_vendor_attr(&vendor, &data, &len);
+	res = rad_get_vendor_attr(&vendor, &data, (size_t *) &len);
 	if (res == -1) {
 		RETURN_FALSE;
 	} else {
@@ -680,7 +681,7 @@ PHP_FUNCTION(radius_demangle)
 		efree(buf);
 		RETURN_FALSE;
 	} else {
-		RETVAL_STRINGL(buf, len, 1); 
+		RETVAL_STRINGL((char *) buf, len, 1);
 		efree(buf);
 		return;
 	}
@@ -709,7 +710,7 @@ PHP_FUNCTION(radius_demangle_mppe_key)
 		efree(buf);
 		RETURN_FALSE;
 	} else {
-		RETVAL_STRINGL(buf, dlen, 1); 
+		RETVAL_STRINGL((char *) buf, dlen, 1);
 		efree(buf);
 		return;
 	}
