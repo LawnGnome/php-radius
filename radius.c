@@ -655,7 +655,12 @@ PHP_FUNCTION(radius_server_secret)
 
 	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
 	secret = (char *)rad_server_secret(raddesc->radh);
-	RETURN_STRINGL(secret, strlen(secret), 1);
+
+	if (secret) {
+		RETURN_STRINGL(secret, strlen(secret), 1);
+	}
+
+	RETURN_FALSE;
 }
 /* }}} */
 

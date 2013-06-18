@@ -980,6 +980,9 @@ rad_request_authenticator(struct rad_handle *h, char *buf, size_t len)
 const char *
 rad_server_secret(struct rad_handle *h)
 {
+	if (h->srv >= h->num_servers)
+		return NULL;
+
 	return (h->servers[h->srv].secret);
 }
 
