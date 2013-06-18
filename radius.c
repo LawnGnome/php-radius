@@ -266,7 +266,7 @@ PHP_FUNCTION(radius_add_server)
 /* {{{ proto bool radius_create_request(desc, code) */
 PHP_FUNCTION(radius_create_request)
 {
-	int code;
+	long code;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 
@@ -544,7 +544,7 @@ PHP_FUNCTION(radius_get_vendor_attr)
 {
 	int res, vendor;
 	const void *data;
-	size_t len;
+	int len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &len) == FAILURE) {
 		return;
@@ -665,8 +665,7 @@ PHP_FUNCTION(radius_demangle)
 	zval *z_radh;
 	const void *mangled;
 	unsigned char *buf;
-	size_t len;
-	int res;
+	int len, res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_radh, &mangled, &len) == FAILURE) {
 		return;
@@ -695,8 +694,8 @@ PHP_FUNCTION(radius_demangle_mppe_key)
 	zval *z_radh;
 	const void *mangled;
 	unsigned char *buf;
-	size_t len, dlen;
-	int res;
+	size_t dlen;
+	int len, res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_radh, &mangled, &len) == FAILURE) {
 		return;
