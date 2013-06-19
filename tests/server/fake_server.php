@@ -377,7 +377,7 @@ class FakeServer {
             // Wait for SIGUSR1 from the child process to indicate it's
             // started up. If it takes more than 10 seconds, there are bigger
             // problems.
-            if (sleep(10)) {
+            if (sleep(10) || version_compare(phpversion(), '5.0.0', '<')) {
                 // OK, the child is ready.
                 return $pid;
             } else {

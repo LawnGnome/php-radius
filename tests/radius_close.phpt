@@ -7,7 +7,9 @@ error_reporting=-1
 <?php
 var_dump(radius_close(radius_acct_open()));
 var_dump(radius_close(radius_auth_open()));
-var_dump(radius_close(opendir('.')));
+
+// The boolean cast is because PHP 4 will return NULL rather than false here.
+var_dump((boolean) radius_close(opendir('.')));
 ?>
 --EXPECTF--
 bool(true)
