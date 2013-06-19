@@ -3,6 +3,10 @@ radius_close()
 --INI--
 display_errors=1
 error_reporting=-1
+--SKIPIF--
+<?php
+if (!extension_loaded('radius')) echo 'SKIP: radius extension required';
+?>
 --FILE--
 <?php
 var_dump(radius_close(radius_acct_open()));

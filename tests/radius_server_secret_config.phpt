@@ -3,6 +3,10 @@ radius_server_secret(): load from configuration file
 --INI--
 display_errors=1
 error_reporting=-1
+--SKIPIF--
+<?php
+if (!extension_loaded('radius')) echo 'SKIP: radius extension required';
+?>
 --FILE--
 <?php
 $file = dirname(__FILE__).'/radius_server_secret.conf';
