@@ -203,3 +203,5 @@ const char		*rad_strerror(struct rad_handle *);
 int			 rad_demangle(struct rad_handle *, const void *, size_t, u_char *);
 
 #endif /* _RADLIB_H_ */
+
+/* vim: set ts=4 sw=4 noet: */

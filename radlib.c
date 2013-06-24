@@ -1107,3 +1107,5 @@ rad_demangle_mppe_key(struct rad_handle *h, const void *mangled, size_t mlen, u_
 	memcpy(demangled, P + 1, *len);
 	return 0;
 }
+
+/* vim: set ts=4 sw=4 noet: */

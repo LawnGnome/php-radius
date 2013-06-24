@@ -71,3 +71,5 @@ char *strsep(char **stringp,	const char *delim)
 	}
 	/* NOTREACHED */
 }
+
+/* vim: set ts=4 sw=4 noet: */

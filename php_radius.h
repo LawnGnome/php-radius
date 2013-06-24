@@ -104,3 +104,5 @@ PHP_FUNCTION(radius_demangle_mppe_key);
  * indent-tabs-mode: t
  * End:
  */
+
+/* vim: set ts=4 sw=4 noet: */
