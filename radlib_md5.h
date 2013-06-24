@@ -39,4 +39,4 @@ any other GPL-like (LGPL, GPL2) License.
 #define MD5Final PHP_MD5Final
 #define MD5_CTX PHP_MD5_CTX
 
-/* vim: set ts=4 sw=4 noet: */
+/* vim: set ts=8 sw=8 noet: */

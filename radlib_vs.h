@@ -84,4 +84,4 @@ int	rad_demangle_mppe_key(struct rad_handle *, const void *, size_t, u_char *, s
 
 #endif /* _RADLIB_VS_H_ */
 
-/* vim: set ts=4 sw=4 noet: */
+/* vim: set ts=8 sw=8 noet: */

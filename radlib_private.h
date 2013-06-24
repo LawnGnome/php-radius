@@ -104,4 +104,4 @@ struct vendor_attribute {
 
 #endif
 
-/* vim: set ts=4 sw=4 noet: */
+/* vim: set ts=8 sw=8 noet: */

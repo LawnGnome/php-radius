@@ -204,4 +204,4 @@ int			 rad_demangle(struct rad_handle *, const void *, size_t, u_char *);
 
 #endif /* _RADLIB_H_ */
 
-/* vim: set ts=4 sw=4 noet: */
+/* vim: set ts=8 sw=8 noet: */

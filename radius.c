@@ -735,6 +735,6 @@ void _radius_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
+ * vim600: noet sw=8 ts=8 fdm=marker
+ * vim<600: noet sw=8 ts=8
  */
