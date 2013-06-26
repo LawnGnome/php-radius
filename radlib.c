@@ -486,7 +486,13 @@ rad_continue_send_request(struct rad_handle *h, int selected, int *fd,
 		if (++h->srv >= h->num_servers)
 			h->srv = 0;
 
-	if (h->request[POS_CODE] == RAD_ACCOUNTING_REQUEST)
+	if (h->request[POS_CODE] == RAD_ACCOUNTING_REQUEST
+	    || h->request[POS_CODE] == RAD_COA_REQUEST
+	    || h->request[POS_CODE] == RAD_COA_ACK
+	    || h->request[POS_CODE] == RAD_COA_NAK
+	    || h->request[POS_CODE] == RAD_DISCONNECT_REQUEST
+	    || h->request[POS_CODE] == RAD_DISCONNECT_ACK
+	    || h->request[POS_CODE] == RAD_DISCONNECT_NAK)
 		/* Insert the request authenticator into the request */
 		insert_request_authenticator(h, h->srv);
 	else
@@ -638,10 +644,16 @@ rad_init_send_request(struct rad_handle *h, int *fd, struct timeval *tv)
 		}
 	}
 
-	if (h->request[POS_CODE] == RAD_ACCOUNTING_REQUEST) {
+	if (h->request[POS_CODE] == RAD_ACCOUNTING_REQUEST
+	    || h->request[POS_CODE] == RAD_COA_REQUEST
+	    || h->request[POS_CODE] == RAD_COA_ACK
+	    || h->request[POS_CODE] == RAD_COA_NAK
+	    || h->request[POS_CODE] == RAD_DISCONNECT_REQUEST
+	    || h->request[POS_CODE] == RAD_DISCONNECT_ACK
+	    || h->request[POS_CODE] == RAD_DISCONNECT_NAK) {
 		/* Make sure no password given */
 		if (h->pass_pos || h->chap_pass) {
-			generr(h, "User or Chap Password in accounting request");
+			generr(h, "User or Chap Password in non-access request");
 			return -1;
 		}
 	} else {
