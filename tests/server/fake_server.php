@@ -246,8 +246,10 @@ class RadiusResponse extends Response {
      */
     function serialise($request, $secret) {
         $attributes = '';
-        foreach ($this->attributes as $attribute) {
-            $attributes .= $attribute->serialise();
+        if (is_array($this->attributes)) {
+            foreach ($this->attributes as $attribute) {
+                $attributes .= $attribute->serialise();
+            }
         }
 
         $header = pack('CCn', $this->code, $request->id, 20 + strlen($attributes));
@@ -300,8 +302,8 @@ class FakeServer {
      */
     function addTransaction($expectedRequest, $response = null) {
         $this->transactions[] = array(
-            'request'  => $expectedRequest,
-            'response' => $response,
+            'request'  => clone $expectedRequest,
+            'response' => clone $response,
         );
     }
 
