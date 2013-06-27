@@ -706,6 +706,7 @@ rad_auth_open(void)
 		h->type = RADIUS_AUTH;
 		h->request_created = 0;        
 		h->resp_len = 0;
+		h->srv = 0;
 	}
 	return h;
 }
