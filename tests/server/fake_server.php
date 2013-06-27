@@ -74,6 +74,10 @@ class Attribute {
         $attribute = new Attribute;
         $data = unpack('Ctype/Csize', $raw);
 
+        if ($data['type'] == RADIUS_VENDOR_SPECIFIC) {
+            return VendorSpecificAttribute::parse($raw);
+        }
+
         $attribute->type = $data['type'];
         $attribute->value = substr($raw, 2, $data['size'] - 2);
 
@@ -87,6 +91,71 @@ class Attribute {
      */
     function serialise() {
         return pack('CC', $this->type, strlen($this->value) + 2).$this->value;
+    }
+}
+
+/** A vendor specific attribute. */
+class VendorSpecificAttribute extends Attribute {
+    /**
+     * The vendor ID.
+     *
+     * @var integer $vendorId
+     */
+    var $vendorId;
+
+    /**
+     * The vendor type.
+     *
+     * @var integer $vendorType
+     */
+    var $vendorType;
+
+    /**
+     * Creates a vendor specific attribute with the given ID, type and value.
+     *
+     * @static
+     * @param integer $vendorId
+     * @param integer $vendorType
+     * @param string  $value
+     * @param integer $tag
+     * @return VendorSpecificAttribute
+     */
+    function expect($vendorId, $vendorType, $value, $tag = null) {
+        $attribute = new VendorSpecificAttribute;
+
+        $attribute->type = RADIUS_VENDOR_SPECIFIC;
+        $attribute->vendorId = $vendorId;
+        $attribute->vendorType = $vendorType;
+
+        if (!is_null($tag)) {
+            $attribute->value = pack('C', $tag).$value;
+        } else {
+            $attribute->value = $value;
+        }
+
+        return $attribute;
+    }
+
+    /** {@inheritDoc} */
+    function parse($raw) {
+        $attribute = new VendorSpecificAttribute;
+        $attribute->type = RADIUS_VENDOR_SPECIFIC;
+        $data = unpack('Ctype/Csize/NvendorId/CvendorType', $raw);
+
+        if ($data['type'] != RADIUS_VENDOR_SPECIFIC) {
+            trigger_error('VendorSpecificAttribute::parse() called for a non-VS attribute', E_USER_ERROR);
+        }
+
+        $attribute->vendorId = $data['vendorId'];
+        $attribute->vendorType = $data['vendorType'];
+        $attribute->value = substr($raw, 8);
+
+        return $attribute;
+    }
+
+    /** {@inheritDoc} */
+    function serialise() {
+        return pack('CCNCC', $this->type, strlen($this->value) + 8, $this->vendorId, $this->vendorType, strlen($this->value) + 2);
     }
 }
 
