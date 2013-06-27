@@ -697,6 +697,8 @@ rad_auth_open(void)
 		h->num_servers = 0;
 		h->ident = php_rand(TSRMLS_C);
 		h->errmsg[0] = '\0';
+		memset(h->request, 0, sizeof h->request);
+		h->req_len = 0;
 		memset(h->pass, 0, sizeof h->pass);
 		h->pass_len = 0;
 		h->pass_pos = 0;
