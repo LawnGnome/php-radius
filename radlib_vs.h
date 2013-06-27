@@ -74,7 +74,7 @@
 
 struct rad_handle;
 
-int	rad_get_vendor_attr(u_int32_t *, const void **, size_t *);
+int	rad_get_vendor_attr(u_int32_t *, unsigned char *, const void **, size_t *, const void *, size_t);
 int	rad_put_vendor_addr(struct rad_handle *, int, int, struct in_addr);
 int	rad_put_vendor_attr(struct rad_handle *, int, int, const void *,
 	    size_t);
