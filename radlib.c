@@ -806,9 +806,10 @@ rad_put_attr_tag(struct rad_handle *h, int type, const void *value, size_t len, 
         return -1;
     }
 
-	if (type == RAD_USER_PASSWORD)
-		result = put_password_attr_tag(h, type, value, len, tag);
-	else {
+	if (type == RAD_USER_PASSWORD) {
+		generr(h, "Password attributes do not support tags");
+		return -1;
+	} else {
 		result = put_raw_attr_tag(h, type, value, len, tag);
 		if (result == 0 && type == RAD_CHAP_PASSWORD)
 			h->chap_pass = 1;
