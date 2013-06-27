@@ -154,7 +154,7 @@ class Request {
             }
 
             if (!$found) {
-                printf("Expected attribute %d with value '%s' not found in attribute set\n", $attribute->type, $attribute->value);
+                printf("Expected attribute %d with value '%s' not found in attribute set\n", $attribute->type, bin2hex($attribute->value));
                 return false;
             }
         }
