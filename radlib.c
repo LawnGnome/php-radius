@@ -64,6 +64,8 @@ static int	 put_password_attr(struct rad_handle *, int,
 		    const void *, size_t);
 static int	 put_raw_attr(struct rad_handle *, int,
 		    const void *, size_t);
+static int	 put_raw_attr_tag(struct rad_handle *, int,
+		    const void *, size_t, unsigned char);
 static int	 split(char *, char *[], int, char *, size_t);
 
 static void
@@ -222,6 +224,27 @@ put_raw_attr(struct rad_handle *h, int type, const void *value, size_t len)
 	}
 	h->request[h->req_len++] = type;
 	h->request[h->req_len++] = len + 2;
+	memcpy(&h->request[h->req_len], value, len);
+	h->req_len += len;
+	return 0;
+}
+
+static int
+put_raw_attr_tag(struct rad_handle *h, int type, const void *value, size_t len, unsigned char tag)
+{
+	if (len > 252) {
+		generr(h, "Attribute too long");
+		return -1;
+	}
+	
+	if (h->req_len + 3 + len > MSGSIZE) {
+		generr(h, "Maximum message length exceeded");
+		return -1;
+	}
+
+	h->request[h->req_len++] = type;
+	h->request[h->req_len++] = len + 3;
+	h->request[h->req_len++] = tag;
 	memcpy(&h->request[h->req_len], value, len);
 	h->req_len += len;
 	return 0;
@@ -747,6 +770,12 @@ rad_put_addr(struct rad_handle *h, int type, struct in_addr addr)
 }
 
 int
+rad_put_addr_tag(struct rad_handle *h, int type, struct in_addr addr, unsigned char tag)
+{
+	return rad_put_attr_tag(h, type, &addr.s_addr, sizeof addr.s_addr, tag);
+}
+
+int
 rad_put_attr(struct rad_handle *h, int type, const void *value, size_t len)
 {
 	int result;
@@ -768,6 +797,27 @@ rad_put_attr(struct rad_handle *h, int type, const void *value, size_t len)
 }
 
 int
+rad_put_attr_tag(struct rad_handle *h, int type, const void *value, size_t len, unsigned char tag)
+{
+	int result;
+
+    if (!h->request_created) {
+        generr(h, "Please call rad_create_request()");
+        return -1;
+    }
+
+	if (type == RAD_USER_PASSWORD)
+		result = put_password_attr_tag(h, type, value, len, tag);
+	else {
+		result = put_raw_attr_tag(h, type, value, len, tag);
+		if (result == 0 && type == RAD_CHAP_PASSWORD)
+			h->chap_pass = 1;
+	}
+
+	return result;
+}
+
+int
 rad_put_int(struct rad_handle *h, int type, u_int32_t value)
 {
 	u_int32_t nvalue;
@@ -777,9 +827,24 @@ rad_put_int(struct rad_handle *h, int type, u_int32_t value)
 }
 
 int
+rad_put_int_tag(struct rad_handle *h, int type, u_int32_t value, unsigned char tag)
+{
+	u_int32_t nvalue;
+
+	nvalue = htonl(value);
+	return rad_put_attr_tag(h, type, &nvalue, sizeof nvalue, tag);
+}
+
+int
 rad_put_string(struct rad_handle *h, int type, const char *str)
 {
 	return rad_put_attr(h, type, str, strlen(str));
+}
+
+int
+rad_put_string_tag(struct rad_handle *h, int type, const char *str, unsigned char tag)
+{
+	return rad_put_attr_tag(h, type, str, strlen(str), tag);
 }
 
 /*

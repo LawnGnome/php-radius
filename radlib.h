@@ -217,9 +217,13 @@ int			 rad_get_attr(struct rad_handle *, const void **, size_t *);
 int			 rad_init_send_request(struct rad_handle *, int *, struct timeval *);
 struct rad_handle	*rad_open(void);  /* Deprecated, == rad_auth_open */
 int			 rad_put_addr(struct rad_handle *, int, struct in_addr);
+int			 rad_put_addr_tag(struct rad_handle *, int, struct in_addr, unsigned char);
 int			 rad_put_attr(struct rad_handle *, int, const void *, size_t);
+int			 rad_put_attr_tag(struct rad_handle *, int, const void *, size_t, unsigned char);
 int			 rad_put_int(struct rad_handle *, int, u_int32_t);
+int			 rad_put_int_tag(struct rad_handle *, int, u_int32_t, unsigned char);
 int			 rad_put_string(struct rad_handle *, int, const char *);
+int			 rad_put_string_tag(struct rad_handle *, int, const char *, unsigned char);
 ssize_t			 rad_request_authenticator(struct rad_handle *, char *, size_t);
 int			 rad_send_request(struct rad_handle *);
 const char		*rad_server_secret(struct rad_handle *);

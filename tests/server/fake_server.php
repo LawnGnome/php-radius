@@ -43,13 +43,19 @@ class Attribute {
      * @static
      * @param integer $type
      * @param string  $value
+     * @param integer $tag
      * @return Attribute
      */
-    function expect($type, $value) {
+    function expect($type, $value, $tag = null) {
         $attribute = new Attribute;
 
         $attribute->type = $type;
-        $attribute->value = $value;
+
+        if (!is_null($tag)) {
+            $attribute->value = pack('C', $tag).$value;
+        } else {
+            $attribute->value = $value;
+        }
 
         return $attribute;
     }

@@ -94,6 +94,9 @@ PHP_FUNCTION(radius_demangle_mppe_key);
 #define RADIUS_G(v) (radius_globals.v)
 #endif
 
+#define RADIUS_OPTION_NONE 0
+#define RADIUS_OPTION_TAGGED (1 << 0)
+
 #endif	/* PHP_RADIUS_H */
 
 

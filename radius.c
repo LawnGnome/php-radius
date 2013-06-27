@@ -283,88 +283,115 @@ PHP_FUNCTION(radius_create_request)
 }
 /* }}} */
 
-/* {{{ proto bool radius_put_string(desc, type, str) */
+/* {{{ proto bool radius_put_string(desc, type, str, options, tag) */
 PHP_FUNCTION(radius_put_string)
 {
 	char *str;
 	int str_len;
-	long type;
+	long type, options = 0, tag = 0;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls", &z_radh, &type, &str, &str_len)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls|ll", &z_radh, &type, &str, &str_len, &options, &tag)
 		== FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
 
-	if (rad_put_string(raddesc->radh, type, str) == -1) {
+	if (options & RADIUS_OPTION_TAGGED) {
+		if (tag < 0 || tag > 255) {
+			zend_error(E_NOTICE, "Tag must be between 0 and 255");
+			RETURN_FALSE;
+		}
+
+		if (rad_put_string_tag(raddesc->radh, type, str, tag) == -1) {
+			RETURN_FALSE;
+		}
+	} else if (rad_put_string(raddesc->radh, type, str) == -1) {
 		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
 	}
+
+	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool radius_put_int(desc, type, int) */
+/* {{{ proto bool radius_put_int(desc, type, int, options, tag) */
 PHP_FUNCTION(radius_put_int)
 {
-	long type, val;
+	long type, val, options = 0, tag = 0;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rll", &z_radh, &type, &val)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rll|ll", &z_radh, &type, &val, &options, &tag)
 		== FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
 
-	if (rad_put_int(raddesc->radh, type, val) == -1) {
+	if (options & RADIUS_OPTION_TAGGED) {
+		if (tag < 0 || tag > 255) {
+			zend_error(E_NOTICE, "Tag must be between 0 and 255");
+			RETURN_FALSE;
+		}
+
+		if (rad_put_int_tag(raddesc->radh, type, val, tag) == -1) {
+			RETURN_FALSE;
+		}
+	} else if (rad_put_int(raddesc->radh, type, val) == -1) {
 		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
 	}
+
+	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool radius_put_attr(desc, type, data) */
+/* {{{ proto bool radius_put_attr(desc, type, data, options, tag) */
 PHP_FUNCTION(radius_put_attr)
 {
-	long type;
+	long type, options = 0, tag = 0;
 	int len;
 	char *data;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls", &z_radh, &type, &data, &len)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls|ll", &z_radh, &type, &data, &len, &options, &tag)
 		== FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
 
-	if (rad_put_attr(raddesc->radh, type, data, len) == -1) {
+	if (options & RADIUS_OPTION_TAGGED) {
+		if (tag < 0 || tag > 255) {
+			zend_error(E_NOTICE, "Tag must be between 0 and 255");
+			RETURN_FALSE;
+		}
+
+		if (rad_put_attr_tag(raddesc->radh, type, data, len, tag) == -1) {
+			RETURN_FALSE;
+		}
+	} else if (rad_put_attr(raddesc->radh, type, data, len) == -1) {
 		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
 	}
+
+	RETURN_TRUE;
 
 }
 /* }}} */
 
-/* {{{ proto bool radius_put_addr(desc, type, addr) */
+/* {{{ proto bool radius_put_addr(desc, type, addr, options, tag) */
 PHP_FUNCTION(radius_put_addr)
 {
 	int addrlen;
-	long type;
+	long type, options = 0, tag = 0;
 	char	*addr;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 	struct in_addr intern_addr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls", &z_radh, &type, &addr, &addrlen)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls|ll", &z_radh, &type, &addr, &addrlen, &options, &tag)
 		== FAILURE) {
 		return;
 	}
@@ -376,11 +403,20 @@ PHP_FUNCTION(radius_put_addr)
 		RETURN_FALSE;
 	}
 
-	if (rad_put_addr(raddesc->radh, type, intern_addr) == -1) {
+	if (options & RADIUS_OPTION_TAGGED) {
+		if (tag < 0 || tag > 255) {
+			zend_error(E_NOTICE, "Tag must be between 0 and 255");
+			RETURN_FALSE;
+		}
+
+		if (rad_put_addr_tag(raddesc->radh, type, intern_addr, tag) == -1) {
+			RETURN_FALSE;
+		}
+	} else if (rad_put_addr(raddesc->radh, type, intern_addr) == -1) {
 		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
 	}
+
+	RETURN_TRUE;
 }
 /* }}} */
 
