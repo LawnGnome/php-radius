@@ -140,7 +140,7 @@ class VendorSpecificAttribute extends Attribute {
     function parse($raw) {
         $attribute = new VendorSpecificAttribute;
         $attribute->type = RADIUS_VENDOR_SPECIFIC;
-        $data = unpack('Ctype/Csize/NvendorId/CvendorType', $raw);
+        $data = unpack('Ctype/Csize/NvendorId/CvendorType/CvendorSize', $raw);
 
         if ($data['type'] != RADIUS_VENDOR_SPECIFIC) {
             trigger_error('VendorSpecificAttribute::parse() called for a non-VS attribute', E_USER_ERROR);
@@ -148,7 +148,7 @@ class VendorSpecificAttribute extends Attribute {
 
         $attribute->vendorId = $data['vendorId'];
         $attribute->vendorType = $data['vendorType'];
-        $attribute->value = substr($raw, 8);
+        $attribute->value = substr($raw, 8, $data['vendorSize'] - 2);
 
         return $attribute;
     }
