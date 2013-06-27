@@ -44,7 +44,7 @@ var_dump(radius_get_attr($res));
 var_dump($server->wait());
 ?>
 --EXPECTF--
-int(%d)
+bool(false)
 array(2) {
   ["attr"]=>
   int(18)

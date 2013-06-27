@@ -580,6 +580,10 @@ rad_get_attr(struct rad_handle *h, const void **value, size_t *len)
 {
 	int type;
 
+	if (h->resp_len == 0) {
+		generr(h, "No response has been received");
+		return -1;
+	}
 	if (h->resp_pos >= h->resp_len)
 		return 0;
 	if (h->resp_pos + 2 > h->resp_len) {
@@ -698,7 +702,8 @@ rad_auth_open(void)
 		h->pass_pos = 0;
 		h->chap_pass = 0;
 		h->type = RADIUS_AUTH;
-        h->request_created = 0;        
+		h->request_created = 0;        
+		h->resp_len = 0;
 	}
 	return h;
 }
