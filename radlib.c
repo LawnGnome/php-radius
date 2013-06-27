@@ -1013,6 +1013,14 @@ rad_put_vendor_addr(struct rad_handle *h, int vendor, int type,
 }
 
 int
+rad_put_vendor_addr_tag(struct rad_handle *h, int vendor, int type,
+    struct in_addr addr, unsigned char tag)
+{
+	return (rad_put_vendor_attr_tag(h, vendor, type, &addr.s_addr,
+	    sizeof addr.s_addr, tag));
+}
+
+int
 rad_put_vendor_attr(struct rad_handle *h, int vendor, int type,
     const void *value, size_t len)
 {
@@ -1045,6 +1053,27 @@ rad_put_vendor_attr(struct rad_handle *h, int vendor, int type,
 }
 
 int
+rad_put_vendor_attr_tag(struct rad_handle *h, int vendor, int type,
+    const void *value, size_t len, unsigned char tag)
+{
+	unsigned char *tagged_value = malloc(len + 1);
+	int result;
+
+	if (!tagged_value) {
+		generr(h, "malloc failure (%d bytes)", len + 1);
+		return -1;
+	}
+
+	*tagged_value = tag;
+	memcpy(tagged_value + 1, value, len);
+
+	result = rad_put_vendor_attr(h, vendor, type, tagged_value, len + 1);
+
+	free(tagged_value);
+	return result;
+}
+
+int
 rad_put_vendor_int(struct rad_handle *h, int vendor, int type, u_int32_t i)
 {
 	u_int32_t value;
@@ -1054,10 +1083,26 @@ rad_put_vendor_int(struct rad_handle *h, int vendor, int type, u_int32_t i)
 }
 
 int
+rad_put_vendor_int_tag(struct rad_handle *h, int vendor, int type, u_int32_t i, unsigned char tag)
+{
+	u_int32_t value;
+
+	value = htonl(i);
+	return (rad_put_vendor_attr_tag(h, vendor, type, &value, sizeof value, tag));
+}
+
+int
 rad_put_vendor_string(struct rad_handle *h, int vendor, int type,
     const char *str)
 {
 	return (rad_put_vendor_attr(h, vendor, type, str, strlen(str)));
+}
+
+int
+rad_put_vendor_string_tag(struct rad_handle *h, int vendor, int type,
+    const char *str, unsigned char tag)
+{
+	return (rad_put_vendor_attr_tag(h, vendor, type, str, strlen(str), tag));
 }
 
 ssize_t

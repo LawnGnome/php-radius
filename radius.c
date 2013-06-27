@@ -420,88 +420,115 @@ PHP_FUNCTION(radius_put_addr)
 }
 /* }}} */
 
-/* {{{ proto bool radius_put_vendor_string(desc, vendor, type, str) */
+/* {{{ proto bool radius_put_vendor_string(desc, vendor, type, str, options, tag) */
 PHP_FUNCTION(radius_put_vendor_string)
 {
 	char *str;
 	int str_len;
-	long type, vendor;
+	long type, vendor, options = 0, tag = 0;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlls", &z_radh, &vendor, &type, &str, &str_len)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlls|ll", &z_radh, &vendor, &type, &str, &str_len, &options, &tag)
 		== FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
 
-	if (rad_put_vendor_string(raddesc->radh, vendor, type, str) == -1) {
+	if (options & RADIUS_OPTION_TAGGED) {
+		if (tag < 0 || tag > 255) {
+			zend_error(E_NOTICE, "Tag must be between 0 and 255");
+			RETURN_FALSE;
+		}
+
+		if (rad_put_vendor_string_tag(raddesc->radh, vendor, type, str, tag) == -1) {
+			RETURN_FALSE;
+		}
+	} else if (rad_put_vendor_string(raddesc->radh, vendor, type, str) == -1) {
 		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
 	}
+
+	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool radius_put_vendor_int(desc, vendor, type, int) */
+/* {{{ proto bool radius_put_vendor_int(desc, vendor, type, int, options, tag) */
 PHP_FUNCTION(radius_put_vendor_int)
 {
-	long type, vendor, val;
+	long type, vendor, val, options = 0, tag = 0;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlll", &z_radh, &vendor, &type, &val)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlll|ll", &z_radh, &vendor, &type, &val, &options, &tag)
 		== FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
 
-	if (rad_put_vendor_int(raddesc->radh, vendor, type, val) == -1) {
+	if (options & RADIUS_OPTION_TAGGED) {
+		if (tag < 0 || tag > 255) {
+			zend_error(E_NOTICE, "Tag must be between 0 and 255");
+			RETURN_FALSE;
+		}
+
+		if (rad_put_vendor_int_tag(raddesc->radh, vendor, type, val, tag) == -1) {
+			RETURN_FALSE;
+		}
+	} else if (rad_put_vendor_int(raddesc->radh, vendor, type, val) == -1) {
 		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
 	}
+
+	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool radius_put_vendor_attr(desc, vendor, type, data) */
+/* {{{ proto bool radius_put_vendor_attr(desc, vendor, type, data, options, tag) */
 PHP_FUNCTION(radius_put_vendor_attr)
 {
-	long type, vendor;
+	long type, vendor, options = 0, tag = 0;
 	int len;
 	char *data;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlls", &z_radh, &vendor, &type,
-		&data, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlls|ll", &z_radh, &vendor, &type,
+		&data, &len, &options, &tag) == FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
 
-	if (rad_put_vendor_attr(raddesc->radh, vendor, type, data, len) == -1) {
+	if (options & RADIUS_OPTION_TAGGED) {
+		if (tag < 0 || tag > 255) {
+			zend_error(E_NOTICE, "Tag must be between 0 and 255");
+			RETURN_FALSE;
+		}
+
+		if (rad_put_vendor_attr_tag(raddesc->radh, vendor, type, data, len, tag) == -1) {
+			RETURN_FALSE;
+		}
+	} else if (rad_put_vendor_attr(raddesc->radh, vendor, type, data, len) == -1) {
 		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
 	}
+
+	RETURN_TRUE;
 }
 /* }}} */
 
 /* {{{ proto bool radius_put_vendor_addr(desc, vendor, type, addr) */
 PHP_FUNCTION(radius_put_vendor_addr)
 {
-	long type, vendor;
+	long type, vendor, options = 0, tag = 0;
 	int addrlen;
 	char	*addr;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 	struct in_addr intern_addr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlls", &z_radh, &vendor,
-		&type, &addr, &addrlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlls|ll", &z_radh, &vendor,
+		&type, &addr, &addrlen, &options, &tag) == FAILURE) {
 		return;
 	}
 
@@ -512,11 +539,20 @@ PHP_FUNCTION(radius_put_vendor_addr)
 		RETURN_FALSE;
 	}
 
-	if (rad_put_vendor_addr(raddesc->radh, vendor, type, intern_addr) == -1) {
+	if (options & RADIUS_OPTION_TAGGED) {
+		if (tag < 0 || tag > 255) {
+			zend_error(E_NOTICE, "Tag must be between 0 and 255");
+			RETURN_FALSE;
+		}
+
+		if (rad_put_vendor_addr_tag(raddesc->radh, vendor, type, intern_addr, tag) == -1) {
+			RETURN_FALSE;
+		}
+	} else if (rad_put_vendor_addr(raddesc->radh, vendor, type, intern_addr) == -1) {
 		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
 	}
+
+	RETURN_TRUE;
 }
 /* }}} */
 

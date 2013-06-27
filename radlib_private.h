@@ -102,6 +102,14 @@ struct vendor_attribute {
 	u_char attrib_data[1];
 };
 
+struct vendor_attribute_tag {
+	u_int32_t vendor_value;
+	u_char attrib_type;
+	u_char attrib_len;
+	u_char attrib_tag;
+	u_char attrib_data[1];
+};
+
 #endif
 
 /* vim: set ts=8 sw=8 noet: */
