@@ -85,6 +85,7 @@ PHP_FUNCTION(radius_get_vendor_attr);
 PHP_FUNCTION(radius_cvt_addr);
 PHP_FUNCTION(radius_cvt_int);
 PHP_FUNCTION(radius_cvt_string);
+PHP_FUNCTION(radius_salt_encrypt_attr);
 PHP_FUNCTION(radius_request_authenticator);
 PHP_FUNCTION(radius_server_secret);
 PHP_FUNCTION(radius_demangle);
