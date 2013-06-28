@@ -80,6 +80,8 @@ zend_function_entry radius_functions[] = {
 	PHP_FE(radius_put_vendor_addr,	NULL)
 	PHP_FE(radius_send_request,	NULL)
 	PHP_FE(radius_get_attr,	NULL)
+	PHP_FE(radius_get_tagged_attr_data, NULL)
+	PHP_FE(radius_get_tagged_attr_tag, NULL)
 	PHP_FE(radius_get_vendor_attr,	NULL)
 	PHP_FE(radius_cvt_addr,	NULL)
 	PHP_FE(radius_cvt_int,	NULL)
@@ -607,6 +609,46 @@ PHP_FUNCTION(radius_get_attr)
 		}
 		RETURN_LONG(res);
 	}
+}
+/* }}} */
+
+/* {{{ proto string radius_get_tagged_attr_data(string attr) */
+PHP_FUNCTION(radius_get_tagged_attr_data)
+{
+	const char *attr;
+	int len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &attr, &len) == FAILURE) {
+		return;
+	}
+
+	if (len < 1) {
+		zend_error(E_NOTICE, "Empty attributes cannot have tags");
+		RETURN_FALSE;
+	} else if (len == 1) {
+		RETURN_EMPTY_STRING();
+	}
+
+	RETURN_STRINGL(attr + 1, len - 1, 1);
+}
+/* }}} */
+
+/* {{{ proto string radius_get_tagged_attr_tag(string attr) */
+PHP_FUNCTION(radius_get_tagged_attr_tag)
+{
+	const char *attr;
+	int len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &attr, &len) == FAILURE) {
+		return;
+	}
+
+	if (len < 1) {
+		zend_error(E_NOTICE, "Empty attributes cannot have tags");
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG((long) *attr);
 }
 /* }}} */
 

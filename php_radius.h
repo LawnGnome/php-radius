@@ -79,6 +79,8 @@ PHP_FUNCTION(radius_put_vendor_attr);
 PHP_FUNCTION(radius_put_vendor_addr);
 PHP_FUNCTION(radius_send_request);
 PHP_FUNCTION(radius_get_attr);
+PHP_FUNCTION(radius_get_tagged_attr_data);
+PHP_FUNCTION(radius_get_tagged_attr_tag);
 PHP_FUNCTION(radius_get_vendor_attr);
 PHP_FUNCTION(radius_cvt_addr);
 PHP_FUNCTION(radius_cvt_int);
