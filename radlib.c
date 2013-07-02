@@ -780,10 +780,10 @@ rad_put_attr(struct rad_handle *h, int type, const void *value, size_t len)
 {
 	int result;
 
-    if (!h->request_created) {
-        generr(h, "Please call rad_create_request()");
-        return -1;
-    }
+	if (!h->request_created) {
+		generr(h, "Please call rad_create_request()");
+		return -1;
+	}
 
 	if (type == RAD_USER_PASSWORD)
 		result = put_password_attr(h, type, value, len);
@@ -1028,10 +1028,10 @@ rad_put_vendor_attr(struct rad_handle *h, int vendor, int type,
 	struct vendor_attribute *attr;
 	int res;
     
-    if (!h->request_created) {
-        generr(h, "Please call rad_create_request()");
-        return -1;
-    }    
+	if (!h->request_created) {
+		generr(h, "Please call rad_create_request()");
+		return -1;
+	}
 
 	if ((attr = malloc(len + 6)) == NULL) {
 		generr(h, "malloc failure (%d bytes)", len + 6);
