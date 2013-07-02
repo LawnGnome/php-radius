@@ -55,7 +55,10 @@ struct salted_value {
 	size_t len;
 	char *data;
 };
+
+static int _init_options(struct rad_attr_options *out, int options, int tag);
 static int _salt_value(struct rad_handle *h, const char *in, size_t len, struct salted_value *out TSRMLS_DC);
+
 
 /* If you declare any globals in php_radius.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(radius)
@@ -298,6 +301,7 @@ PHP_FUNCTION(radius_put_string)
 	char *str;
 	int str_len;
 	long type, options = 0, tag = 0;
+	struct rad_attr_options attr_options;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 
@@ -308,16 +312,9 @@ PHP_FUNCTION(radius_put_string)
 
 	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
 
-	if (options & RADIUS_OPTION_TAGGED) {
-		if (tag < 0 || tag > 255) {
-			zend_error(E_NOTICE, "Tag must be between 0 and 255");
-			RETURN_FALSE;
-		}
-
-		if (rad_put_string_tag(raddesc->radh, type, str, tag) == -1) {
-			RETURN_FALSE;
-		}
-	} else if (rad_put_string(raddesc->radh, type, str) == -1) {
+	if (_init_options(&attr_options, options, tag) == -1) {
+		RETURN_FALSE;
+	} else if (rad_put_string(raddesc->radh, type, str, &attr_options) == -1) {
 		RETURN_FALSE;
 	}
 
@@ -329,6 +326,7 @@ PHP_FUNCTION(radius_put_string)
 PHP_FUNCTION(radius_put_int)
 {
 	long type, val, options = 0, tag = 0;
+	struct rad_attr_options attr_options;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 
@@ -339,16 +337,9 @@ PHP_FUNCTION(radius_put_int)
 
 	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
 
-	if (options & RADIUS_OPTION_TAGGED) {
-		if (tag < 0 || tag > 255) {
-			zend_error(E_NOTICE, "Tag must be between 0 and 255");
-			RETURN_FALSE;
-		}
-
-		if (rad_put_int_tag(raddesc->radh, type, val, tag) == -1) {
-			RETURN_FALSE;
-		}
-	} else if (rad_put_int(raddesc->radh, type, val) == -1) {
+	if (_init_options(&attr_options, options, tag) == -1) {
+		RETURN_FALSE;
+	} else if (rad_put_int(raddesc->radh, type, val, &attr_options) == -1) {
 		RETURN_FALSE;
 	}
 
@@ -362,6 +353,7 @@ PHP_FUNCTION(radius_put_attr)
 	long type, options = 0, tag = 0;
 	int len;
 	char *data;
+	struct rad_attr_options attr_options;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 
@@ -372,16 +364,9 @@ PHP_FUNCTION(radius_put_attr)
 
 	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
 
-	if (options & RADIUS_OPTION_TAGGED) {
-		if (tag < 0 || tag > 255) {
-			zend_error(E_NOTICE, "Tag must be between 0 and 255");
-			RETURN_FALSE;
-		}
-
-		if (rad_put_attr_tag(raddesc->radh, type, data, len, tag) == -1) {
-			RETURN_FALSE;
-		}
-	} else if (rad_put_attr(raddesc->radh, type, data, len) == -1) {
+	if (_init_options(&attr_options, options, tag) == -1) {
+		RETURN_FALSE;
+	} else if (rad_put_attr(raddesc->radh, type, data, len, &attr_options) == -1) {
 		RETURN_FALSE;
 	}
 
@@ -396,6 +381,7 @@ PHP_FUNCTION(radius_put_addr)
 	int addrlen;
 	long type, options = 0, tag = 0;
 	char	*addr;
+	struct rad_attr_options attr_options;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 	struct in_addr intern_addr;
@@ -412,16 +398,9 @@ PHP_FUNCTION(radius_put_addr)
 		RETURN_FALSE;
 	}
 
-	if (options & RADIUS_OPTION_TAGGED) {
-		if (tag < 0 || tag > 255) {
-			zend_error(E_NOTICE, "Tag must be between 0 and 255");
-			RETURN_FALSE;
-		}
-
-		if (rad_put_addr_tag(raddesc->radh, type, intern_addr, tag) == -1) {
-			RETURN_FALSE;
-		}
-	} else if (rad_put_addr(raddesc->radh, type, intern_addr) == -1) {
+	if (_init_options(&attr_options, options, tag) == -1) {
+		RETURN_FALSE;
+	} else if (rad_put_addr(raddesc->radh, type, intern_addr, &attr_options) == -1) {
 		RETURN_FALSE;
 	}
 
@@ -435,6 +414,7 @@ PHP_FUNCTION(radius_put_vendor_string)
 	char *str;
 	int str_len;
 	long type, vendor, options = 0, tag = 0;
+	struct rad_attr_options attr_options;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 
@@ -445,16 +425,9 @@ PHP_FUNCTION(radius_put_vendor_string)
 
 	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
 
-	if (options & RADIUS_OPTION_TAGGED) {
-		if (tag < 0 || tag > 255) {
-			zend_error(E_NOTICE, "Tag must be between 0 and 255");
-			RETURN_FALSE;
-		}
-
-		if (rad_put_vendor_string_tag(raddesc->radh, vendor, type, str, tag) == -1) {
-			RETURN_FALSE;
-		}
-	} else if (rad_put_vendor_string(raddesc->radh, vendor, type, str) == -1) {
+	if (_init_options(&attr_options, options, tag) == -1) {
+		RETURN_FALSE;
+	} else if (rad_put_vendor_string(raddesc->radh, vendor, type, str, &attr_options) == -1) {
 		RETURN_FALSE;
 	}
 
@@ -466,6 +439,7 @@ PHP_FUNCTION(radius_put_vendor_string)
 PHP_FUNCTION(radius_put_vendor_int)
 {
 	long type, vendor, val, options = 0, tag = 0;
+	struct rad_attr_options attr_options;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 
@@ -476,16 +450,9 @@ PHP_FUNCTION(radius_put_vendor_int)
 
 	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
 
-	if (options & RADIUS_OPTION_TAGGED) {
-		if (tag < 0 || tag > 255) {
-			zend_error(E_NOTICE, "Tag must be between 0 and 255");
-			RETURN_FALSE;
-		}
-
-		if (rad_put_vendor_int_tag(raddesc->radh, vendor, type, val, tag) == -1) {
-			RETURN_FALSE;
-		}
-	} else if (rad_put_vendor_int(raddesc->radh, vendor, type, val) == -1) {
+	if (_init_options(&attr_options, options, tag) == -1) {
+		RETURN_FALSE;
+	} else if (rad_put_vendor_int(raddesc->radh, vendor, type, val, &attr_options) == -1) {
 		RETURN_FALSE;
 	}
 
@@ -499,6 +466,7 @@ PHP_FUNCTION(radius_put_vendor_attr)
 	long type, vendor, options = 0, tag = 0;
 	int len;
 	char *data;
+	struct rad_attr_options attr_options;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 
@@ -509,16 +477,9 @@ PHP_FUNCTION(radius_put_vendor_attr)
 
 	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
 
-	if (options & RADIUS_OPTION_TAGGED) {
-		if (tag < 0 || tag > 255) {
-			zend_error(E_NOTICE, "Tag must be between 0 and 255");
-			RETURN_FALSE;
-		}
-
-		if (rad_put_vendor_attr_tag(raddesc->radh, vendor, type, data, len, tag) == -1) {
-			RETURN_FALSE;
-		}
-	} else if (rad_put_vendor_attr(raddesc->radh, vendor, type, data, len) == -1) {
+	if (_init_options(&attr_options, options, tag) == -1) {
+		RETURN_FALSE;
+	} else if (rad_put_vendor_attr(raddesc->radh, vendor, type, data, len, &attr_options) == -1) {
 		RETURN_FALSE;
 	}
 
@@ -532,6 +493,7 @@ PHP_FUNCTION(radius_put_vendor_addr)
 	long type, vendor, options = 0, tag = 0;
 	int addrlen;
 	char	*addr;
+	struct rad_attr_options attr_options;
 	radius_descriptor *raddesc;
 	zval *z_radh;
 	struct in_addr intern_addr;
@@ -548,16 +510,9 @@ PHP_FUNCTION(radius_put_vendor_addr)
 		RETURN_FALSE;
 	}
 
-	if (options & RADIUS_OPTION_TAGGED) {
-		if (tag < 0 || tag > 255) {
-			zend_error(E_NOTICE, "Tag must be between 0 and 255");
-			RETURN_FALSE;
-		}
-
-		if (rad_put_vendor_addr_tag(raddesc->radh, vendor, type, intern_addr, tag) == -1) {
-			RETURN_FALSE;
-		}
-	} else if (rad_put_vendor_addr(raddesc->radh, vendor, type, intern_addr) == -1) {
+	if (_init_options(&attr_options, options, tag) == -1) {
+		RETURN_FALSE;
+	} else if (rad_put_vendor_addr(raddesc->radh, vendor, type, intern_addr, &attr_options) == -1) {
 		RETURN_FALSE;
 	}
 
@@ -865,6 +820,24 @@ PHP_FUNCTION(radius_demangle_mppe_key)
 		efree(buf);
 		return;
 	}
+}
+/* }}} */
+
+/* {{{ _init_options() */
+int _init_options(struct rad_attr_options *out, int options, int tag) {
+	memset(out, 0, sizeof(struct rad_attr_options));
+
+	if (options & RADIUS_OPTION_TAGGED) {
+		if (tag < 0 || tag > 255) {
+			zend_error(E_NOTICE, "Tag must be between 0 and 255");
+			return -1;
+		}
+
+		out->options |= RAD_OPTION_TAG;
+		out->tag = tag;
+	}
+
+	return 0;
 }
 /* }}} */
 

@@ -61,11 +61,11 @@ static void	 insert_request_authenticator(struct rad_handle *, int);
 static int	 is_valid_response(struct rad_handle *, int,
 		    const struct sockaddr_in *);
 static int	 put_password_attr(struct rad_handle *, int,
-		    const void *, size_t);
+		    const void *, size_t,
+		    const struct rad_attr_options *);
 static int	 put_raw_attr(struct rad_handle *, int,
-		    const void *, size_t);
-static int	 put_raw_attr_tag(struct rad_handle *, int,
-		    const void *, size_t, unsigned char);
+		    const void *, size_t,
+		    const struct rad_attr_options *);
 static int	 split(char *, char *[], int, char *, size_t);
 
 static void
@@ -181,10 +181,15 @@ is_valid_response(struct rad_handle *h, int srv,
 }
 
 static int
-put_password_attr(struct rad_handle *h, int type, const void *value, size_t len)
+put_password_attr(struct rad_handle *h, int type, const void *value, size_t len, const struct rad_attr_options *options)
 {
 	int padded_len;
 	int pad_len;
+
+	if (options->options & RAD_OPTION_TAG) {
+		generr(h, "User-Password attributes cannot be tagged");
+		return -1;
+	}
 
 	if (h->pass_pos != 0) {
 		generr(h, "Multiple User-Password attributes specified");
@@ -200,7 +205,7 @@ put_password_attr(struct rad_handle *h, int type, const void *value, size_t len)
 	 * remember where it is so we can fill it in later.
 	 */
 	clear_password(h);
-	put_raw_attr(h, type, h->pass, padded_len);
+	put_raw_attr(h, type, h->pass, padded_len, options);
 	h->pass_pos = h->req_len - padded_len;
 
 	/* Save the cleartext password, padded as necessary */
@@ -211,40 +216,30 @@ put_password_attr(struct rad_handle *h, int type, const void *value, size_t len)
 }
 
 static int
-put_raw_attr(struct rad_handle *h, int type, const void *value, size_t len)
+put_raw_attr(struct rad_handle *h, int type, const void *value, size_t len, const struct rad_attr_options *options)
 {
-	if (len > 253) {
+	size_t full_len = 2 + len;
+
+	if (options->options & RAD_OPTION_TAG) {
+		full_len++;
+	}
+
+	if (full_len > 255) {
 		generr(h, "Attribute too long");
 		return -1;
 	}
 	
-	if (h->req_len + 2 + len > MSGSIZE) {
+	if (h->req_len + full_len > MSGSIZE) {
 		generr(h, "Maximum message length exceeded");
 		return -1;
 	}
 	h->request[h->req_len++] = type;
-	h->request[h->req_len++] = len + 2;
-	memcpy(&h->request[h->req_len], value, len);
-	h->req_len += len;
-	return 0;
-}
+	h->request[h->req_len++] = full_len;
 
-static int
-put_raw_attr_tag(struct rad_handle *h, int type, const void *value, size_t len, unsigned char tag)
-{
-	if (len > 252) {
-		generr(h, "Attribute too long");
-		return -1;
-	}
-	
-	if (h->req_len + 3 + len > MSGSIZE) {
-		generr(h, "Maximum message length exceeded");
-		return -1;
+	if (options->options & RAD_OPTION_TAG) {
+		h->request[h->req_len++] = options->tag;
 	}
 
-	h->request[h->req_len++] = type;
-	h->request[h->req_len++] = len + 3;
-	h->request[h->req_len++] = tag;
 	memcpy(&h->request[h->req_len], value, len);
 	h->req_len += len;
 	return 0;
@@ -764,19 +759,13 @@ rad_open(void)
 }
 
 int
-rad_put_addr(struct rad_handle *h, int type, struct in_addr addr)
+rad_put_addr(struct rad_handle *h, int type, struct in_addr addr, const struct rad_attr_options *options)
 {
-	return rad_put_attr(h, type, &addr.s_addr, sizeof addr.s_addr);
+	return rad_put_attr(h, type, &addr.s_addr, sizeof addr.s_addr, options);
 }
 
 int
-rad_put_addr_tag(struct rad_handle *h, int type, struct in_addr addr, unsigned char tag)
-{
-	return rad_put_attr_tag(h, type, &addr.s_addr, sizeof addr.s_addr, tag);
-}
-
-int
-rad_put_attr(struct rad_handle *h, int type, const void *value, size_t len)
+rad_put_attr(struct rad_handle *h, int type, const void *value, size_t len, const struct rad_attr_options *options)
 {
 	int result;
 
@@ -786,9 +775,9 @@ rad_put_attr(struct rad_handle *h, int type, const void *value, size_t len)
 	}
 
 	if (type == RAD_USER_PASSWORD)
-		result = put_password_attr(h, type, value, len);
+		result = put_password_attr(h, type, value, len, options);
 	else {
-		result = put_raw_attr(h, type, value, len);
+		result = put_raw_attr(h, type, value, len, options);
 		if (result == 0 && type == RAD_CHAP_PASSWORD)
 			h->chap_pass = 1;
 	}
@@ -797,55 +786,18 @@ rad_put_attr(struct rad_handle *h, int type, const void *value, size_t len)
 }
 
 int
-rad_put_attr_tag(struct rad_handle *h, int type, const void *value, size_t len, unsigned char tag)
-{
-	int result;
-
-    if (!h->request_created) {
-        generr(h, "Please call rad_create_request()");
-        return -1;
-    }
-
-	if (type == RAD_USER_PASSWORD) {
-		generr(h, "Password attributes do not support tags");
-		return -1;
-	} else {
-		result = put_raw_attr_tag(h, type, value, len, tag);
-		if (result == 0 && type == RAD_CHAP_PASSWORD)
-			h->chap_pass = 1;
-	}
-
-	return result;
-}
-
-int
-rad_put_int(struct rad_handle *h, int type, u_int32_t value)
+rad_put_int(struct rad_handle *h, int type, u_int32_t value, const struct rad_attr_options *options)
 {
 	u_int32_t nvalue;
 
 	nvalue = htonl(value);
-	return rad_put_attr(h, type, &nvalue, sizeof nvalue);
+	return rad_put_attr(h, type, &nvalue, sizeof nvalue, options);
 }
 
 int
-rad_put_int_tag(struct rad_handle *h, int type, u_int32_t value, unsigned char tag)
+rad_put_string(struct rad_handle *h, int type, const char *str, const struct rad_attr_options *options)
 {
-	u_int32_t nvalue;
-
-	nvalue = htonl(value);
-	return rad_put_attr_tag(h, type, &nvalue, sizeof nvalue, tag);
-}
-
-int
-rad_put_string(struct rad_handle *h, int type, const char *str)
-{
-	return rad_put_attr(h, type, str, strlen(str));
-}
-
-int
-rad_put_string_tag(struct rad_handle *h, int type, const char *str, unsigned char tag)
-{
-	return rad_put_attr_tag(h, type, str, strlen(str), tag);
+	return rad_put_attr(h, type, str, strlen(str), options);
 }
 
 /*
@@ -1007,43 +959,52 @@ rad_get_vendor_attr(u_int32_t *vendor, unsigned char *type, const void **data, s
 
 int
 rad_put_vendor_addr(struct rad_handle *h, int vendor, int type,
-    struct in_addr addr)
+    struct in_addr addr, const struct rad_attr_options *options)
 {
 	return (rad_put_vendor_attr(h, vendor, type, &addr.s_addr,
-	    sizeof addr.s_addr));
-}
-
-int
-rad_put_vendor_addr_tag(struct rad_handle *h, int vendor, int type,
-    struct in_addr addr, unsigned char tag)
-{
-	return (rad_put_vendor_attr_tag(h, vendor, type, &addr.s_addr,
-	    sizeof addr.s_addr, tag));
+	    sizeof addr.s_addr, options));
 }
 
 int
 rad_put_vendor_attr(struct rad_handle *h, int vendor, int type,
-    const void *value, size_t len)
+    const void *value, size_t len, const struct rad_attr_options *options)
 {
 	struct vendor_attribute *attr;
+	struct rad_attr_options generic_options;
 	int res;
+	size_t va_len = len + 6;
     
 	if (!h->request_created) {
 		generr(h, "Please call rad_create_request()");
 		return -1;
 	}
 
-	if ((attr = malloc(len + 6)) == NULL) {
-		generr(h, "malloc failure (%d bytes)", len + 6);
+	if (options->options & RAD_OPTION_TAG) {
+		va_len++;
+	}
+
+	if ((attr = malloc(va_len)) == NULL) {
+		generr(h, "malloc failure (%d bytes)", va_len);
 		return -1;
 	}
 
 	attr->vendor_value = htonl(vendor);
 	attr->attrib_type = type;
-	attr->attrib_len = len + 2;
-	memcpy(attr->attrib_data, value, len);
+	attr->attrib_len = va_len - 4;
+	generic_options.tag = 0;
 
-	res = put_raw_attr(h, RAD_VENDOR_SPECIFIC, attr, len + 6);
+	/* Tagging needs to occur within the vendor specific attribute,
+	 * rather than the generic attribute. */
+	if (options->options & RAD_OPTION_TAG) {
+		generic_options.options = options->options & ~RAD_OPTION_TAG;
+		attr->attrib_data[0] = options->tag;
+		memcpy(attr->attrib_data + 1, value, len);
+	} else {
+		generic_options.options = options->options;
+		memcpy(attr->attrib_data, value, len);
+	}
+
+	res = put_raw_attr(h, RAD_VENDOR_SPECIFIC, attr, va_len, &generic_options);
 	free(attr);
 	if (res == 0 && vendor == RAD_VENDOR_MICROSOFT
 	    && (type == RAD_MICROSOFT_MS_CHAP_RESPONSE
@@ -1054,56 +1015,19 @@ rad_put_vendor_attr(struct rad_handle *h, int vendor, int type,
 }
 
 int
-rad_put_vendor_attr_tag(struct rad_handle *h, int vendor, int type,
-    const void *value, size_t len, unsigned char tag)
-{
-	unsigned char *tagged_value = malloc(len + 1);
-	int result;
-
-	if (!tagged_value) {
-		generr(h, "malloc failure (%d bytes)", len + 1);
-		return -1;
-	}
-
-	*tagged_value = tag;
-	memcpy(tagged_value + 1, value, len);
-
-	result = rad_put_vendor_attr(h, vendor, type, tagged_value, len + 1);
-
-	free(tagged_value);
-	return result;
-}
-
-int
-rad_put_vendor_int(struct rad_handle *h, int vendor, int type, u_int32_t i)
+rad_put_vendor_int(struct rad_handle *h, int vendor, int type, u_int32_t i, const struct rad_attr_options *options)
 {
 	u_int32_t value;
 
 	value = htonl(i);
-	return (rad_put_vendor_attr(h, vendor, type, &value, sizeof value));
-}
-
-int
-rad_put_vendor_int_tag(struct rad_handle *h, int vendor, int type, u_int32_t i, unsigned char tag)
-{
-	u_int32_t value;
-
-	value = htonl(i);
-	return (rad_put_vendor_attr_tag(h, vendor, type, &value, sizeof value, tag));
+	return (rad_put_vendor_attr(h, vendor, type, &value, sizeof value, options));
 }
 
 int
 rad_put_vendor_string(struct rad_handle *h, int vendor, int type,
-    const char *str)
+    const char *str, const struct rad_attr_options *options)
 {
-	return (rad_put_vendor_attr(h, vendor, type, str, strlen(str)));
-}
-
-int
-rad_put_vendor_string_tag(struct rad_handle *h, int vendor, int type,
-    const char *str, unsigned char tag)
-{
-	return (rad_put_vendor_attr_tag(h, vendor, type, str, strlen(str), tag));
+	return (rad_put_vendor_attr(h, vendor, type, str, strlen(str), options));
 }
 
 ssize_t

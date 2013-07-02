@@ -72,17 +72,14 @@
 
 #define SALT_LEN    2
 
+struct rad_attr_options;
 struct rad_handle;
 
 int	rad_get_vendor_attr(u_int32_t *, unsigned char *, const void **, size_t *, const void *, size_t);
-int	rad_put_vendor_addr(struct rad_handle *, int, int, struct in_addr);
-int	rad_put_vendor_addr_tag(struct rad_handle *, int, int, struct in_addr, unsigned char);
-int	rad_put_vendor_attr(struct rad_handle *, int, int, const void *, size_t);
-int	rad_put_vendor_attr_tag(struct rad_handle *, int, int, const void *, size_t, unsigned char);
-int	rad_put_vendor_int(struct rad_handle *, int, int, u_int32_t);
-int	rad_put_vendor_int_tag(struct rad_handle *, int, int, u_int32_t, unsigned char);
-int	rad_put_vendor_string(struct rad_handle *, int, int, const char *);
-int	rad_put_vendor_string_tag(struct rad_handle *, int, int, const char *, unsigned char);
+int	rad_put_vendor_addr(struct rad_handle *, int, int, struct in_addr, const struct rad_attr_options *);
+int	rad_put_vendor_attr(struct rad_handle *, int, int, const void *, size_t, const struct rad_attr_options *);
+int	rad_put_vendor_int(struct rad_handle *, int, int, u_int32_t, const struct rad_attr_options *);
+int	rad_put_vendor_string(struct rad_handle *, int, int, const char *, const struct rad_attr_options *);
 int	rad_demangle_mppe_key(struct rad_handle *, const void *, size_t, u_char *, size_t *);
 
 #endif /* _RADLIB_VS_H_ */

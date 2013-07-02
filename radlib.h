@@ -198,8 +198,17 @@
 	#define RAD_ERROR_CAUSE_RESOURCES_UNAVAILABLE			506
 	#define RAD_ERROR_CAUSE_REQUEST_INITIATED			507
 
+#define RAD_OPTION_NONE			0
+#define RAD_OPTION_TAG			(1 << 0)
+#define RAD_OPTION_SALT			(1 << 1)
+
 struct rad_handle;
 struct timeval;
+
+struct rad_attr_options {
+	int options;
+	unsigned char tag;
+};
 
 struct rad_handle	*rad_acct_open(void);
 int			 rad_add_server(struct rad_handle *, 
@@ -216,14 +225,10 @@ char			*rad_cvt_string(const void *, size_t);
 int			 rad_get_attr(struct rad_handle *, const void **, size_t *);
 int			 rad_init_send_request(struct rad_handle *, int *, struct timeval *);
 struct rad_handle	*rad_open(void);  /* Deprecated, == rad_auth_open */
-int			 rad_put_addr(struct rad_handle *, int, struct in_addr);
-int			 rad_put_addr_tag(struct rad_handle *, int, struct in_addr, unsigned char);
-int			 rad_put_attr(struct rad_handle *, int, const void *, size_t);
-int			 rad_put_attr_tag(struct rad_handle *, int, const void *, size_t, unsigned char);
-int			 rad_put_int(struct rad_handle *, int, u_int32_t);
-int			 rad_put_int_tag(struct rad_handle *, int, u_int32_t, unsigned char);
-int			 rad_put_string(struct rad_handle *, int, const char *);
-int			 rad_put_string_tag(struct rad_handle *, int, const char *, unsigned char);
+int			 rad_put_addr(struct rad_handle *, int, struct in_addr, const struct rad_attr_options *);
+int			 rad_put_attr(struct rad_handle *, int, const void *, size_t, const struct rad_attr_options *);
+int			 rad_put_int(struct rad_handle *, int, u_int32_t, const struct rad_attr_options *);
+int			 rad_put_string(struct rad_handle *, int, const char *, const struct rad_attr_options *);
 ssize_t			 rad_request_authenticator(struct rad_handle *, char *, size_t);
 int			 rad_send_request(struct rad_handle *);
 const char		*rad_server_secret(struct rad_handle *);
