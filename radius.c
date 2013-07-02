@@ -51,13 +51,7 @@ any other GPL-like (LGPL, GPL2) License.
 
 void _radius_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
-struct salted_value {
-	size_t len;
-	char *data;
-};
-
 static int _init_options(struct rad_attr_options *out, int options, int tag);
-static int _salt_value(struct rad_handle *h, const char *in, size_t len, struct salted_value *out TSRMLS_DC);
 
 
 /* If you declare any globals in php_radius.h uncomment this:
@@ -700,7 +694,7 @@ PHP_FUNCTION(radius_salt_encrypt_attr)
 	char *data;
 	int len;
 	radius_descriptor *raddesc;
-	struct salted_value salted;
+	struct rad_salted_value salted;
 	zval *z_radh;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_radh, &data, &len) == FAILURE) {
@@ -709,7 +703,8 @@ PHP_FUNCTION(radius_salt_encrypt_attr)
 
 	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
 
-	if (_salt_value(raddesc->radh, data, len, &salted TSRMLS_CC) == -1) {
+	if (rad_salt_value(raddesc->radh, data, len, &salted TSRMLS_CC) == -1) {
+		zend_error(E_WARNING, "%s", rad_strerror(raddesc->radh));
 		RETURN_FALSE;
 	} else if (salted.len == 0) {
 		RETURN_EMPTY_STRING();
@@ -847,118 +842,6 @@ void _radius_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	radius_descriptor *raddesc = (radius_descriptor *)rsrc->ptr;
 	rad_close(raddesc->radh);
 	efree(raddesc);
-}
-/* }}} */
-
-/* {{{ _salt_value() */
-int _salt_value(struct rad_handle *h, const char *in, size_t len, struct salted_value *out TSRMLS_DC)
-{
-	char authenticator[16];
-	size_t i;
-	char intermediate[16];
-	const char *in_pos;
-	PHP_MD5_CTX md5;
-	char *out_pos;
-	php_uint32 random;
-	size_t salted_len;
-	const char *secret;
-
-	if (len == 0) {
-		out->len = 0;
-		out->data = NULL;
-		return 0;
-	}
-
-	/* Calculate the padded salted value length. */
-	salted_len = len;
-	if ((salted_len & 0x0f) != 0) {
-		salted_len += 0x0f;
-		salted_len &= ~0x0f;
-	}
-
-	/* 250 because there's a five byte overhead: one byte for type, one for
-	 * length, two for the salt, and one for the encrypted value length,
-	 * and the maximum RADIUS attribute size is 255 bytes. */
-	if (salted_len > 250) {
-		zend_error(E_WARNING, "Value is too long to be salt-encrypted");
-		return -1;
-	}
-
-	/* Actually allocate the buffer. */
-	out->len = salted_len + 3;
-	out->data = emalloc(out->len);
-
-	if (out->data == NULL) {
-		return -1;
-	}
-
-	memset(out->data, 0, out->len);
-
-	/* Grab the request authenticator. */
-	if (rad_request_authenticator(h, authenticator, sizeof authenticator) != sizeof authenticator) {
-		zend_error(E_WARNING, "Cannot obtain the RADIUS request authenticator");
-		goto err;
-	}
-
-	/* Grab the server secret. */
-	secret = rad_server_secret(h);
-	if (secret == NULL) {
-		zend_error(E_WARNING, "Cannot obtain the RADIUS server secret");
-		goto err;
-	}
-
-	/* Generate a random number to use as the salt. */
-	random = php_rand(TSRMLS_C);
-
-	/* The RFC requires that the high bit of the salt be 1. Otherwise,
-	 * let's set up the header. */
-	out->data[0] = (unsigned char) random | 0x80;
-	out->data[1] = (unsigned char) (random >> 8);
-	out->data[2] = (unsigned char) salted_len;
-
-	/* OK, let's get cracking on this. We have to calculate what the RFC
-	 * calls b1 first. */
-	PHP_MD5Init(&md5);
-	PHP_MD5Update(&md5, secret, strlen(secret));
-	PHP_MD5Update(&md5, authenticator, sizeof authenticator);
-	PHP_MD5Update(&md5, out->data, 2);
-	PHP_MD5Final(intermediate, &md5);
-
-	/* XOR the first chunk. */
-	in_pos = in - 1;
-	out_pos = out->data + 2;
-	for (i = 0; i < 16; i++) {
-		if (in_pos < (in + len)) {
-			*(++out_pos) = *(++in_pos) ^ intermediate[i];
-		} else {
-			*(++out_pos) = '\0' ^ intermediate[i];
-		}
-	}
-
-	/* Now walk over the rest of the input. */
-	while (in_pos < (in + len)) {
-		PHP_MD5Init(&md5);
-		PHP_MD5Update(&md5, secret, strlen(secret));
-		PHP_MD5Update(&md5, out_pos - 15, 16);
-		PHP_MD5Final(intermediate, &md5);
-
-		for (i = 0; i < 16; i++) {
-			if (in_pos < (in + len)) {
-				*(++out_pos) = *(++in_pos) ^ intermediate[i];
-			} else {
-				*(++out_pos) = '\0' ^ intermediate[i];
-			}
-		}
-	}
-
-	return 0;
-
-err:
-	efree(out->data);
-	out->data = NULL;
-	out->len = 0;
-
-	return -1;
 }
 /* }}} */
 

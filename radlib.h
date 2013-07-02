@@ -210,6 +210,11 @@ struct rad_attr_options {
 	unsigned char tag;
 };
 
+struct rad_salted_value {
+	size_t len;
+	char *data;
+};
+
 struct rad_handle	*rad_acct_open(void);
 int			 rad_add_server(struct rad_handle *, 
 				const char *, int, const char *, int, int);
@@ -234,6 +239,7 @@ int			 rad_send_request(struct rad_handle *);
 const char		*rad_server_secret(struct rad_handle *);
 const char		*rad_strerror(struct rad_handle *);
 int			 rad_demangle(struct rad_handle *, const void *, size_t, u_char *);
+int	 		 rad_salt_value(struct rad_handle *, const char *, size_t, struct rad_salted_value *);
 
 #endif /* _RADLIB_H_ */
 

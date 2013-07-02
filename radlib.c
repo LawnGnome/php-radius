@@ -186,6 +186,11 @@ put_password_attr(struct rad_handle *h, int type, const void *value, size_t len,
 	int padded_len;
 	int pad_len;
 
+	if (options->options & RAD_OPTION_SALT) {
+		generr(h, "User-Password attributes cannot be salt-encrypted");
+		return -1;
+	}
+
 	if (options->options & RAD_OPTION_TAG) {
 		generr(h, "User-Password attributes cannot be tagged");
 		return -1;
@@ -218,7 +223,22 @@ put_password_attr(struct rad_handle *h, int type, const void *value, size_t len,
 static int
 put_raw_attr(struct rad_handle *h, int type, const void *value, size_t len, const struct rad_attr_options *options)
 {
+	const void *actual_value = value;
 	size_t full_len = 2 + len;
+	int res = -1;
+	struct rad_salted_value *salted = NULL;
+
+	if (options->options & RAD_OPTION_SALT) {
+		salted = malloc(sizeof(struct rad_salted_value));
+
+		if (rad_salt_value(h, value, len, salted) == -1) {
+			goto end;
+		} else {
+			actual_value = salted->data;
+			len = salted->len;
+			full_len = 2 + len;
+		}
+	}
 
 	if (options->options & RAD_OPTION_TAG) {
 		full_len++;
@@ -226,12 +246,12 @@ put_raw_attr(struct rad_handle *h, int type, const void *value, size_t len, cons
 
 	if (full_len > 255) {
 		generr(h, "Attribute too long");
-		return -1;
+		goto end;
 	}
 	
 	if (h->req_len + full_len > MSGSIZE) {
 		generr(h, "Maximum message length exceeded");
-		return -1;
+		goto end;
 	}
 	h->request[h->req_len++] = type;
 	h->request[h->req_len++] = full_len;
@@ -240,9 +260,16 @@ put_raw_attr(struct rad_handle *h, int type, const void *value, size_t len, cons
 		h->request[h->req_len++] = options->tag;
 	}
 
-	memcpy(&h->request[h->req_len], value, len);
+	memcpy(&h->request[h->req_len], actual_value, len);
 	h->req_len += len;
-	return 0;
+	res = 0;
+
+end:
+	if (salted) {
+		free(salted);
+	}
+
+	return res;
 }
 
 int
@@ -1170,6 +1197,117 @@ rad_demangle_mppe_key(struct rad_handle *h, const void *mangled, size_t mlen, u_
 
 	memcpy(demangled, P + 1, *len);
 	return 0;
+}
+
+int rad_salt_value(struct rad_handle *h, const char *in, size_t len, struct rad_salted_value *out)
+{
+	char authenticator[16];
+	size_t i;
+	char intermediate[16];
+	const char *in_pos;
+	MD5_CTX md5;
+	char *out_pos;
+	php_uint32 random;
+	size_t salted_len;
+	const char *secret;
+	TSRMLS_FETCH();
+
+	if (len == 0) {
+		out->len = 0;
+		out->data = NULL;
+		return 0;
+	}
+
+	/* Calculate the padded salted value length. */
+	salted_len = len;
+	if ((salted_len & 0x0f) != 0) {
+		salted_len += 0x0f;
+		salted_len &= ~0x0f;
+	}
+
+	/* 250 because there's a five byte overhead: one byte for type, one for
+	 * length, two for the salt, and one for the encrypted value length,
+	 * and the maximum RADIUS attribute size is 255 bytes. */
+	if (salted_len > 250) {
+		generr(h, "Value is too long to be salt-encrypted");
+		return -1;
+	}
+
+	/* Actually allocate the buffer. */
+	out->len = salted_len + 3;
+	out->data = emalloc(out->len);
+
+	if (out->data == NULL) {
+		return -1;
+	}
+
+	memset(out->data, 0, out->len);
+
+	/* Grab the request authenticator. */
+	if (rad_request_authenticator(h, authenticator, sizeof authenticator) != sizeof authenticator) {
+		generr(h, "Cannot obtain the RADIUS request authenticator");
+		goto err;
+	}
+
+	/* Grab the server secret. */
+	secret = rad_server_secret(h);
+	if (secret == NULL) {
+		generr(h, "Cannot obtain the RADIUS server secret");
+		goto err;
+	}
+
+	/* Generate a random number to use as the salt. */
+	random = php_rand(TSRMLS_C);
+
+	/* The RFC requires that the high bit of the salt be 1. Otherwise,
+	 * let's set up the header. */
+	out->data[0] = (unsigned char) random | 0x80;
+	out->data[1] = (unsigned char) (random >> 8);
+	out->data[2] = (unsigned char) salted_len;
+
+	/* OK, let's get cracking on this. We have to calculate what the RFC
+	 * calls b1 first. */
+	MD5Init(&md5);
+	MD5Update(&md5, secret, strlen(secret));
+	MD5Update(&md5, authenticator, sizeof authenticator);
+	MD5Update(&md5, out->data, 2);
+	MD5Final(intermediate, &md5);
+
+	/* XOR the first chunk. */
+	in_pos = in - 1;
+	out_pos = out->data + 2;
+	for (i = 0; i < 16; i++) {
+		if (in_pos < (in + len)) {
+			*(++out_pos) = *(++in_pos) ^ intermediate[i];
+		} else {
+			*(++out_pos) = '\0' ^ intermediate[i];
+		}
+	}
+
+	/* Now walk over the rest of the input. */
+	while (in_pos < (in + len)) {
+		MD5Init(&md5);
+		MD5Update(&md5, secret, strlen(secret));
+		MD5Update(&md5, out_pos - 15, 16);
+		MD5Final(intermediate, &md5);
+
+		for (i = 0; i < 16; i++) {
+			if (in_pos < (in + len)) {
+				*(++out_pos) = *(++in_pos) ^ intermediate[i];
+			} else {
+				*(++out_pos) = '\0' ^ intermediate[i];
+			}
+		}
+	}
+
+	return 0;
+
+err:
+	efree(out->data);
+	out->data = NULL;
+	out->len = 0;
+
+	return -1;
 }
 
 /* vim: set ts=8 sw=8 noet: */
