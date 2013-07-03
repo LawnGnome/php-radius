@@ -997,9 +997,11 @@ int
 rad_put_vendor_attr(struct rad_handle *h, int vendor, int type,
     const void *value, size_t len, const struct rad_attr_options *options)
 {
+	const void *actual_value = value;
 	struct vendor_attribute *attr;
 	struct rad_attr_options generic_options;
 	int res;
+	struct rad_salted_value *salted = NULL;
 	size_t va_len = len + 6;
     
 	if (!h->request_created) {
@@ -1019,17 +1021,34 @@ rad_put_vendor_attr(struct rad_handle *h, int vendor, int type,
 	attr->vendor_value = htonl(vendor);
 	attr->attrib_type = type;
 	attr->attrib_len = va_len - 4;
+
+	generic_options.options = options->options;
 	generic_options.tag = 0;
 
-	/* Tagging needs to occur within the vendor specific attribute,
-	 * rather than the generic attribute. */
+	/* Salting needs to be done on the vendor specific attribute. */
+	if (options->options & RAD_OPTION_SALT) {
+		generic_options.options &= ~RAD_OPTION_SALT;
+		salted = emalloc(sizeof(struct rad_salted_value));
+
+		if (rad_salt_value(h, value, len, salted) == -1) {
+			res = -1;
+			goto end;
+		} else {
+			actual_value = salted->data;
+			len = salted->len;
+			va_len = len + 6;
+		}
+	}
+
+	/* Similarly, tagging needs to occur within the vendor specific
+	 * attribute, rather than the generic attribute. */
 	if (options->options & RAD_OPTION_TAG) {
-		generic_options.options = options->options & ~RAD_OPTION_TAG;
+		generic_options.options &= ~RAD_OPTION_TAG;
 		attr->attrib_data[0] = options->tag;
-		memcpy(attr->attrib_data + 1, value, len);
+		memcpy(attr->attrib_data + 1, actual_value, len);
 	} else {
 		generic_options.options = options->options;
-		memcpy(attr->attrib_data, value, len);
+		memcpy(attr->attrib_data, actual_value, len);
 	}
 
 	res = put_raw_attr(h, RAD_VENDOR_SPECIFIC, attr, va_len, &generic_options);
@@ -1039,7 +1058,14 @@ rad_put_vendor_attr(struct rad_handle *h, int vendor, int type,
 	    || type == RAD_MICROSOFT_MS_CHAP2_RESPONSE)) {
 		h->chap_pass = 1;
 	}
-	return (res);
+
+end:
+	if (salted) {
+		efree(salted->data);
+		efree(salted);
+	}
+
+	return res;
 }
 
 int

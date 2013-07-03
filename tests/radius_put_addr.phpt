@@ -21,6 +21,7 @@ $res = $server->getAuthResource();
 $request = Request::expect(RADIUS_ACCESS_REQUEST, array(
     Attribute::expect(RADIUS_USER_NAME, 'foo'),
     Attribute::expect(RADIUS_NAS_IP_ADDRESS, pack('N', ip2long('127.0.0.1'))),
+    SaltedAttribute::expect(RADIUS_LOGIN_IP_HOST, pack('N', ip2long('0.0.0.0'))),
 ));
 
 $response = new RadiusResponse;
@@ -33,16 +34,20 @@ $server->addTransaction($request, $response);
 $server->handle();
 
 var_dump(radius_put_addr($res, RADIUS_NAS_IP_ADDRESS, '127.0.0.1'));
+var_dump(radius_put_addr($res, RADIUS_LOGIN_IP_HOST, '0.0.0.0', RADIUS_OPTION_SALT));
 
 radius_create_request($res, RADIUS_ACCESS_REQUEST);
 radius_put_string($res, RADIUS_USER_NAME, 'foo');
 radius_put_string($res, RADIUS_USER_PASSWORD, 'bar');
 var_dump(radius_put_addr($res, RADIUS_NAS_IP_ADDRESS, '127.0.0.1'));
+var_dump(radius_put_addr($res, RADIUS_LOGIN_IP_HOST, '0.0.0.0', RADIUS_OPTION_SALT));
 radius_send_request($res);
 
 var_dump($server->wait());
 ?>
 --EXPECTF--
 bool(false)
+bool(false)
+bool(true)
 bool(true)
 int(0)

@@ -21,6 +21,7 @@ $res = $server->getAuthResource();
 $request = Request::expect(RADIUS_ACCESS_REQUEST, array(
     Attribute::expect(RADIUS_USER_NAME, 'foo'),
     Attribute::expect(RADIUS_NAS_IP_ADDRESS, pack('N', ip2long('127.0.0.1')), 10),
+    SaltedAttribute::expect(RADIUS_LOGIN_IP_HOST, pack('N', ip2long('0.0.0.0')), 10),
 ));
 
 $response = new RadiusResponse;
@@ -35,11 +36,13 @@ $server->handle();
 var_dump(radius_put_addr($res, RADIUS_NAS_IP_ADDRESS, '127.0.0.1', RADIUS_OPTION_TAGGED, -1));
 var_dump(radius_put_addr($res, RADIUS_NAS_IP_ADDRESS, '127.0.0.1', RADIUS_OPTION_TAGGED, 256));
 var_dump(radius_put_addr($res, RADIUS_NAS_IP_ADDRESS, '127.0.0.1', RADIUS_OPTION_TAGGED, 10));
+var_dump(radius_put_addr($res, RADIUS_LOGIN_IP_HOST, '0.0.0.0', RADIUS_OPTION_SALT | RADIUS_OPTION_TAGGED, 10));
 
 radius_create_request($res, RADIUS_ACCESS_REQUEST);
 radius_put_string($res, RADIUS_USER_NAME, 'foo');
 radius_put_string($res, RADIUS_USER_PASSWORD, 'bar');
 var_dump(radius_put_addr($res, RADIUS_NAS_IP_ADDRESS, '127.0.0.1', RADIUS_OPTION_TAGGED, 10));
+var_dump(radius_put_addr($res, RADIUS_LOGIN_IP_HOST, '0.0.0.0', RADIUS_OPTION_SALT | RADIUS_OPTION_TAGGED, 10));
 radius_send_request($res);
 
 var_dump($server->wait());
@@ -51,5 +54,7 @@ bool(false)
 Notice: Tag must be between 0 and 255 in %s on line %d
 bool(false)
 bool(false)
+bool(false)
+bool(true)
 bool(true)
 int(0)

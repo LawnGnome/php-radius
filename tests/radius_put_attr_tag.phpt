@@ -20,6 +20,7 @@ $res = $server->getAuthResource();
 
 $request = Request::expect(RADIUS_ACCESS_REQUEST, array(
     Attribute::expect(RADIUS_USER_NAME, 'foo', 10),
+    SaltedAttribute::expect(RADIUS_LOGIN_IP_HOST, 'bar', 10),
 ));
 
 $response = new RadiusResponse;
@@ -34,9 +35,11 @@ $server->handle();
 var_dump(radius_put_attr($res, RADIUS_USER_NAME, 'foo', RADIUS_OPTION_TAGGED, -1));
 var_dump(radius_put_attr($res, RADIUS_USER_NAME, 'foo', RADIUS_OPTION_TAGGED, 256));
 var_dump(radius_put_attr($res, RADIUS_USER_NAME, 'foo', RADIUS_OPTION_TAGGED, 10));
+var_dump(radius_put_attr($res, RADIUS_LOGIN_IP_HOST, 'bar', RADIUS_OPTION_SALT | RADIUS_OPTION_TAGGED, 10));
 
 radius_create_request($res, RADIUS_ACCESS_REQUEST);
 var_dump(radius_put_attr($res, RADIUS_USER_NAME, 'foo', RADIUS_OPTION_TAGGED, 10));
+var_dump(radius_put_attr($res, RADIUS_LOGIN_IP_HOST, 'bar', RADIUS_OPTION_SALT | RADIUS_OPTION_TAGGED, 10));
 radius_put_string($res, RADIUS_USER_PASSWORD, 'bar');
 radius_send_request($res);
 
@@ -49,5 +52,7 @@ bool(false)
 Notice: Tag must be between 0 and 255 in %s on line %d
 bool(false)
 bool(false)
+bool(false)
+bool(true)
 bool(true)
 int(0)

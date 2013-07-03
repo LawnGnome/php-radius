@@ -20,6 +20,7 @@ $res = $server->getAuthResource();
 
 $request = Request::expect(RADIUS_ACCESS_REQUEST, array(
     Attribute::expect(RADIUS_USER_NAME, 'foo'),
+    SaltedAttribute::expect(RADIUS_LOGIN_IP_HOST, 'bar'),
 ));
 
 $response = new RadiusResponse;
@@ -32,9 +33,11 @@ $server->addTransaction($request, $response);
 $server->handle();
 
 var_dump(radius_put_attr($res, RADIUS_USER_NAME, 'foo'));
+var_dump(radius_put_attr($res, RADIUS_LOGIN_IP_HOST, 'bar', RADIUS_OPTION_SALT));
 
 radius_create_request($res, RADIUS_ACCESS_REQUEST);
 var_dump(radius_put_attr($res, RADIUS_USER_NAME, 'foo'));
+var_dump(radius_put_attr($res, RADIUS_LOGIN_IP_HOST, 'bar', RADIUS_OPTION_SALT));
 radius_put_string($res, RADIUS_USER_PASSWORD, 'bar');
 radius_send_request($res);
 
@@ -42,5 +45,7 @@ var_dump($server->wait());
 ?>
 --EXPECTF--
 bool(false)
+bool(false)
+bool(true)
 bool(true)
 int(0)

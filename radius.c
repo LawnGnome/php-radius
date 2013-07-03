@@ -822,6 +822,10 @@ PHP_FUNCTION(radius_demangle_mppe_key)
 int _init_options(struct rad_attr_options *out, int options, int tag) {
 	memset(out, 0, sizeof(struct rad_attr_options));
 
+	if (options & RADIUS_OPTION_SALT) {
+		out->options |= RAD_OPTION_SALT;
+	}
+
 	if (options & RADIUS_OPTION_TAGGED) {
 		if (tag < 0 || tag > 255) {
 			zend_error(E_NOTICE, "Tag must be between 0 and 255");

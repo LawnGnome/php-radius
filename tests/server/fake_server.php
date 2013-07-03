@@ -34,6 +34,17 @@ class Attribute {
      * @return boolean
      */
     function compare($expected, $actual) {
+        if (is_a($expected, 'SaltedAttribute')) {
+            $expectedLength = (16 * ceil(strlen($expected->value) / 16) + 3);
+
+            if ($expected->tag) {
+                $tag = unpack('Ctag', $actual->value);
+                return (($expected->type == $actual->type) && (strlen($actual->value) == $expectedLength + 1) && ($expected->tag == $tag['tag']));
+            } else {
+                return (($expected->type == $actual->type) && (strlen($actual->value) == $expectedLength));
+            }
+        }
+
         return ($expected == $actual);
     }
 
@@ -91,6 +102,27 @@ class Attribute {
      */
     function serialise() {
         return pack('CC', $this->type, strlen($this->value) + 2).$this->value;
+    }
+}
+
+/** A salted attribute. */
+class SaltedAttribute extends Attribute {
+    var $tag;
+
+    function expect($type, $value, $tag = null) {
+        $attribute = new SaltedAttribute;
+
+        $attribute->type = $type;
+
+        if (!is_null($tag)) {
+            $attribute->tag = $tag;
+            $attribute->value = pack('C', $tag).$value;
+        } else {
+            $attribute->tag = null;
+            $attribute->value = $value;
+        }
+
+        return $attribute;
     }
 }
 
