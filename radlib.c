@@ -229,7 +229,7 @@ put_raw_attr(struct rad_handle *h, int type, const void *value, size_t len, cons
 	struct rad_salted_value *salted = NULL;
 
 	if (options->options & RAD_OPTION_SALT) {
-		salted = malloc(sizeof(struct rad_salted_value));
+		salted = emalloc(sizeof(struct rad_salted_value));
 
 		if (rad_salt_value(h, value, len, salted) == -1) {
 			goto end;
@@ -266,7 +266,8 @@ put_raw_attr(struct rad_handle *h, int type, const void *value, size_t len, cons
 
 end:
 	if (salted) {
-		free(salted);
+		efree(salted->data);
+		efree(salted);
 	}
 
 	return res;
