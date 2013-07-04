@@ -12,6 +12,13 @@
 /** An attribute in a RADIUS request or response. */
 class Attribute {
     /**
+     * The number of bytes consumed when parsing.
+     *
+     * @var integer $consumed
+     */
+    var $consumed;
+
+    /**
      * Whether the attribute is salted.
      *
      * @var boolean $salted
@@ -48,7 +55,32 @@ class Attribute {
      * @return boolean
      */
     function compare($expected, $actual) {
-        if ($expected->salted) {
+        if (is_a($expected, 'VendorSpecificAttribute')) {
+            if (!is_a($actual, 'VendorSpecificAttribute')) {
+                return false;
+            }
+
+            if ($expected->salted) {
+                $expectedLength = (16 * ceil(strlen($expected->value) / 16) + 3);
+
+                if ($expected->tag) {
+                    $tag = unpack('Ctag', $actual->value);
+                    return (($expected->type == $actual->type) && (strlen($actual->value) == $expectedLength + 1) && ($expected->tag == $tag['tag']));
+                } else {
+                    return (($expected->type == $actual->type) && (strlen($actual->value) == $expectedLength));
+                }
+            } else {
+                return ($expected->type == $actual->type) && ($expected->value == $actual->value) && ($expected->vendorId == $actual->vendorId) && ($expected->vendorType == $actual->vendorType);
+            }
+            $expectedLength = (16 * ceil(strlen($expected->value) / 16) + 3);
+
+            if ($expected->tag) {
+                $tag = unpack('Ctag', $actual->value);
+                return (($expected->type == $actual->type) && (strlen($actual->value) == $expectedLength + 1) && ($expected->tag == $tag['tag']));
+            } else {
+                return (($expected->type == $actual->type) && (strlen($actual->value) == $expectedLength));
+            }
+        } elseif ($expected->salted) {
             $expectedLength = (16 * ceil(strlen($expected->value) / 16) + 3);
 
             if ($expected->tag) {
@@ -105,6 +137,7 @@ class Attribute {
             return VendorSpecificAttribute::parse($raw);
         }
 
+        $attribute->consumed = $data['size'];
         $attribute->type = $data['type'];
         $attribute->value = substr($raw, 2, $data['size'] - 2);
 
@@ -175,6 +208,7 @@ class VendorSpecificAttribute extends Attribute {
             trigger_error('VendorSpecificAttribute::parse() called for a non-VS attribute', E_USER_ERROR);
         }
 
+        $attribute->consumed = $data['size'];
         $attribute->vendorId = $data['vendorId'];
         $attribute->vendorType = $data['vendorType'];
         $attribute->value = substr($raw, 8, $data['vendorSize'] - 2);
@@ -296,7 +330,7 @@ class Request {
 
         while (strlen($attributes)) {
             $attribute = Attribute::parse($attributes);
-            $attributes = substr($attributes, strlen($attribute->value) + 2);
+            $attributes = substr($attributes, $attribute->consumed);
             $request->attributes[] = $attribute;
         }
 
