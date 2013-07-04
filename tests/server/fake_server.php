@@ -12,6 +12,20 @@
 /** An attribute in a RADIUS request or response. */
 class Attribute {
     /**
+     * Whether the attribute is salted.
+     *
+     * @var boolean $salted
+     */
+    var $salted = false;
+
+    /**
+     * An optional attribute tag.
+     *
+     * @var integer $tag
+     */
+    var $tag;
+
+    /**
      * The attribute type.
      *
      * @var integer $type
@@ -34,7 +48,7 @@ class Attribute {
      * @return boolean
      */
     function compare($expected, $actual) {
-        if (is_a($expected, 'SaltedAttribute')) {
+        if ($expected->salted) {
             $expectedLength = (16 * ceil(strlen($expected->value) / 16) + 3);
 
             if ($expected->tag) {
@@ -43,9 +57,9 @@ class Attribute {
             } else {
                 return (($expected->type == $actual->type) && (strlen($actual->value) == $expectedLength));
             }
+        } else {
+            return ($expected->type == $actual->type) && ($expected->value == $actual->value);
         }
-
-        return ($expected == $actual);
     }
 
     /**
@@ -57,12 +71,14 @@ class Attribute {
      * @param integer $tag
      * @return Attribute
      */
-    function expect($type, $value, $tag = null) {
+    function expect($type, $value, $tag = null, $salted = false) {
         $attribute = new Attribute;
 
+        $attribute->salted = $salted;
         $attribute->type = $type;
 
         if (!is_null($tag)) {
+            $attribute->tag = $tag;
             $attribute->value = pack('C', $tag).$value;
         } else {
             $attribute->value = $value;
@@ -105,27 +121,6 @@ class Attribute {
     }
 }
 
-/** A salted attribute. */
-class SaltedAttribute extends Attribute {
-    var $tag;
-
-    function expect($type, $value, $tag = null) {
-        $attribute = new SaltedAttribute;
-
-        $attribute->type = $type;
-
-        if (!is_null($tag)) {
-            $attribute->tag = $tag;
-            $attribute->value = pack('C', $tag).$value;
-        } else {
-            $attribute->tag = null;
-            $attribute->value = $value;
-        }
-
-        return $attribute;
-    }
-}
-
 /** A vendor specific attribute. */
 class VendorSpecificAttribute extends Attribute {
     /**
@@ -152,14 +147,16 @@ class VendorSpecificAttribute extends Attribute {
      * @param integer $tag
      * @return VendorSpecificAttribute
      */
-    function expect($vendorId, $vendorType, $value, $tag = null) {
+    function expect($vendorId, $vendorType, $value, $tag = null, $salted = false) {
         $attribute = new VendorSpecificAttribute;
 
+        $attribute->salted = $salted;
         $attribute->type = RADIUS_VENDOR_SPECIFIC;
         $attribute->vendorId = $vendorId;
         $attribute->vendorType = $vendorType;
 
         if (!is_null($tag)) {
+            $attribute->tag = $tag;
             $attribute->value = pack('C', $tag).$value;
         } else {
             $attribute->value = $value;

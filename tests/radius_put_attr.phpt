@@ -20,7 +20,7 @@ $res = $server->getAuthResource();
 
 $request = Request::expect(RADIUS_ACCESS_REQUEST, array(
     Attribute::expect(RADIUS_USER_NAME, 'foo'),
-    SaltedAttribute::expect(RADIUS_LOGIN_IP_HOST, 'bar'),
+    Attribute::expect(RADIUS_LOGIN_IP_HOST, 'bar', null, true),
 ));
 
 $response = new RadiusResponse;

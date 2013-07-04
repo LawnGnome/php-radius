@@ -21,7 +21,7 @@ $res = $server->getAuthResource();
 $request = Request::expect(RADIUS_ACCESS_REQUEST, array(
     Attribute::expect(RADIUS_USER_NAME, 'foo'),
     Attribute::expect(RADIUS_NAS_PORT, pack('N', 1234)),
-    SaltedAttribute::expect(RADIUS_LOGIN_TCP_PORT, pack('N', 2345)),
+    Attribute::expect(RADIUS_LOGIN_TCP_PORT, pack('N', 2345), null, true),
 ));
 
 $response = new RadiusResponse;
