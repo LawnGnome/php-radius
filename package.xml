@@ -21,25 +21,50 @@ OS (for example against Windows Active-Directory via IAS).
   <email>aharvey@php.net</email>
   <active>yes</active>
  </lead>
- <date>2013-06-27</date>
- <time>14:09:00</time>
+ <date>2013-07-04</date>
+ <time>23:15:00</time>
  <version>
-  <release>1.2.7</release>
-  <api>1.2.7</api>
+  <release>1.3.0b1</release>
+  <api>1.3.0b1</api>
  </version>
 
  <stability>
-  <release>stable</release>
-  <api>stable</api>
+  <release>beta</release>
+  <api>beta</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
  <notes>
-This release fixes a security issue in radius_get_vendor_attr(). It is strongly
-recommended that users using vendor specific attributes upgrade immediately,
-with other users encouraged to upgrade when practical.
+This release adds several new features:
 
-- Fix a security issue in radius_get_vendor_attr() by enforcing checks of the
-  VSA length field against the buffer size. (Adam)
+- Support for CoA and disconnect packets.
+- Support for tagged attributes.
+- Support for salt-encrypted attributes.
+- Support for Juniper vendor specific attributes.
+
+These features are based on code written by Gabriel Blanchard in his fork of
+PECL radius: https://github.com/gblanchard/pecl-radius.
+
+Three new functions have been added to handle these features:
+
+- radius_get_tagged_attr_data(string attr)
+  This function returns the data from a tagged attribute.
+- radius_get_tagged_attr_tag(string attr)
+  This function returns the tag from a tagged attribute.
+- radius_salt_encrypt_attr(resource radius_handle, string attr)
+  This function salt-encrypts the given attribute. This shouldn't normally need
+  to be called manually, but is available for unusual use cases.
+
+Salt encryption is generally achieved through the use of the new
+RADIUS_OPTION_SALT option. All put functions have been extended to accept an
+optional options bitfield and an optional tag value, which will be used to tag
+an attribute if the RADIUS_OPTION_TAGGED option is set.
+
+There should be no backward compatibility breaks with this release; however
+existing users are encouraged to test their code against this release and to
+report any issues that they find.
+
+The next beta is expected in around two weeks from today (approximately July
+18, 2013).
  </notes>
 
  <contents>
@@ -55,6 +80,8 @@ with other users encouraged to upgrade when practical.
     <dir name="server">
      <file name="fake_server.php" role="test" />
     </dir>
+    <file name="coa.phpt" role="test" />
+    <file name="disconnect.phpt" role="test" />
     <file name="radius_acct_open.phpt" role="test" />
     <file name="radius_auth_open.phpt" role="test" />
     <file name="radius_close.phpt" role="test" />
@@ -62,12 +89,27 @@ with other users encouraged to upgrade when practical.
     <file name="radius_cvt_int.phpt" role="test" />
     <file name="radius_cvt_string.phpt" role="test" />
     <file name="radius_get_attr.phpt" role="test" />
+    <file name="radius_get_tagged_attr_data.phpt" role="test" />
+    <file name="radius_get_tagged_attr_tag.phpt" role="test" />
     <file name="radius_get_vendor_attr.phpt" role="test" />
     <file name="radius_put_addr.phpt" role="test" />
+    <file name="radius_put_addr_tag.phpt" role="test" />
     <file name="radius_put_attr.phpt" role="test" />
+    <file name="radius_put_attr_tag.phpt" role="test" />
     <file name="radius_put_int.phpt" role="test" />
+    <file name="radius_put_int_tag.phpt" role="test" />
     <file name="radius_put_string.phpt" role="test" />
+    <file name="radius_put_string_tag.phpt" role="test" />
+    <file name="radius_put_vendor_addr.phpt" role="test" />
+    <file name="radius_put_vendor_addr_tag.phpt" role="test" />
+    <file name="radius_put_vendor_attr.phpt" role="test" />
+    <file name="radius_put_vendor_attr_tag.phpt" role="test" />
+    <file name="radius_put_vendor_int.phpt" role="test" />
+    <file name="radius_put_vendor_int_tag.phpt" role="test" />
+    <file name="radius_put_vendor_string.phpt" role="test" />
+    <file name="radius_put_vendor_string_tag.phpt" role="test" />
     <file name="radius_request_authenticator.phpt" role="test" />
+    <file name="radius_salt_encrypt_attr.phpt" role="test" />
     <file name="radius_server_secret.phpt" role="test" />
     <file name="radius_server_secret_config.phpt" role="test" />
    </dir>
@@ -105,6 +147,46 @@ with other users encouraged to upgrade when practical.
 
   <release>
    <version>
+    <release>1.3.0b1</release>
+    <api>1.3.0b1</api>
+   </version>
+
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2013-07-04</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
+   <notes>
+This release adds several new features:
+
+- Support for CoA and disconnect packets.
+- Support for tagged attributes.
+- Support for salt-encrypted attributes.
+- Support for Juniper vendor specific attributes.
+
+These features are based on code written by Gabriel Blanchard in his fork of
+PECL radius: https://github.com/gblanchard/pecl-radius.
+
+Three new functions have been added to handle these features:
+
+- radius_get_tagged_attr_data(string attr)
+  This function returns the data from a tagged attribute.
+- radius_get_tagged_attr_tag(string attr)
+  This function returns the tag from a tagged attribute.
+- radius_salt_encrypt_attr(resource radius_handle, string attr)
+  This function salt-encrypts the given attribute. This shouldn't normally need
+  to be called manually, but is available for unusual use cases.
+
+Salt encryption is generally achieved through the use of the new
+RADIUS_OPTION_SALT option. All put functions have been extended to accept an
+optional options bitfield and an optional tag value, which will be used to tag
+an attribute if the RADIUS_OPTION_TAGGED option is set.
+   </notes>
+  </release>
+
+  <release>
+   <version>
     <release>1.2.7</release>
     <api>1.2.7</api>
    </version>
@@ -112,6 +194,7 @@ with other users encouraged to upgrade when practical.
     <release>stable</release>
     <api>stable</api>
    </stability>
+   <date>2013-06-27</date>
    <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
    <notes>
 This release fixes a security issue in radius_get_vendor_attr(). It is strongly
@@ -132,6 +215,7 @@ with other users encouraged to upgrade when practical.
     <release>stable</release>
     <api>stable</api>
    </stability>
+   <date>2013-06-20</date>
    <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
    <notes>
 - Support added for PHP 5.4 and 5.5. (Johannes)
