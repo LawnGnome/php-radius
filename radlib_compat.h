@@ -49,7 +49,6 @@ typedef unsigned int u_int32_t;
 #endif
 
 #ifdef PHP_WIN32
-typedef long ssize_t;
 int inet_aton(const char *cp, struct in_addr *inp);
 char *strsep(char **stringp,	const char *delim);
 #define MSG_WAITALL 0
