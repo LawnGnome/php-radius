@@ -29,8 +29,8 @@ OS (for example against Windows Active-Directory via IAS).
  </version>
 
  <stability>
-  <release>beta</release>
-  <api>beta</api>
+  <release>stable</release>
+  <api>stable</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
  <notes>
