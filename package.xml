@@ -24,8 +24,8 @@ OS (for example against Windows Active-Directory via IAS).
  <date>2016-02-15</date>
  <time>15:00:00</time>
  <version>
-  <release>1.4.0b1</release>
-  <api>1.4.0b1</api>
+  <release>1.4.0b2</release>
+  <api>1.4.0b2</api>
  </version>
 
  <stability>
@@ -34,8 +34,7 @@ OS (for example against Windows Active-Directory via IAS).
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
  <notes>
-- Add PHP 7.0 support. (Adam)
-- Drop support for PHP &lt; 5.3.
+- Fix integer handling in PHP 7. (Adam)
  </notes>
 
  <contents>
@@ -129,6 +128,23 @@ OS (for example against Windows Active-Directory via IAS).
  <providesextension>radius</providesextension>
  <extsrcrelease />
  <changelog>
+
+  <release>
+   <version>
+    <release>1.4.0b2</release>
+    <api>1.4.0b2</api>
+   </version>
+
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2016-02-15</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
+   <notes>
+- Fix integer handling in PHP 7. (Adam)
+   </notes>
+  </release>
 
   <release>
    <version>
