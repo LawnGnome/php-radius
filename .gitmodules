@@ -1,0 +1,3 @@
+[submodule "pecl-compat"]
+	path = pecl-compat
+	url = git@github.com:LawnGnome/pecl-compat.git
