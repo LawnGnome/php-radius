@@ -2,7 +2,7 @@
 radius_get_vendor_attr()
 --INI--
 display_errors=1
-error_reporting=30719
+error_reporting=22527
 --SKIPIF--
 <?php
 if (!extension_loaded('radius')) echo 'SKIP: radius extension required';

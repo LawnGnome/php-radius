@@ -2,7 +2,7 @@
 radius_put_vendor_addr() with tag
 --INI--
 display_errors=1
-error_reporting=30719
+error_reporting=22527
 --SKIPIF--
 <?php
 include dirname(__FILE__).'/server/fake_server.php';
