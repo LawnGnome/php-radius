@@ -34,6 +34,7 @@ OS (for example against Windows Active-Directory via IAS).
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
  <notes>
+- Fixed bug #65156 (Please provide LICENSE file). (Adam)
 - Fixed bug #65599 (Fix compiling for VC11 x64). (Jan Ehrhardt)
  </notes>
 
@@ -84,7 +85,8 @@ OS (for example against Windows Active-Directory via IAS).
     <file name="radius_server_secret_config.phpt" role="test" />
    </dir>
    <file name="config.m4" role="src" />
-   <file name="CREDITS" role="src" />
+   <file name="CREDITS" role="doc" />
+   <file name="LICENSE" role="doc" />
    <file name="Makefile.in" role="src" />
    <file name="php_radius.h" role="src" />
    <file name="radius.c" role="src" />
@@ -128,6 +130,7 @@ OS (for example against Windows Active-Directory via IAS).
    <date>2013-07-04</date>
    <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
    <notes>
+- Fixed bug #65156 (Please provide LICENSE file). (Adam)
 - Fixed bug #65599 (Fix compiling for VC11 x64). (Jan Ehrhardt)
    </notes>
   </release>
