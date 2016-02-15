@@ -703,7 +703,7 @@ PHP_FUNCTION(radius_salt_encrypt_attr)
 
 	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
 
-	if (rad_salt_value(raddesc->radh, data, len, &salted TSRMLS_CC) == -1) {
+	if (rad_salt_value(raddesc->radh, data, len, &salted) == -1) {
 		zend_error(E_WARNING, "%s", rad_strerror(raddesc->radh));
 		RETURN_FALSE;
 	} else if (salted.len == 0) {

@@ -35,6 +35,7 @@ OS (for example against Windows Active-Directory via IAS).
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
  <notes>
 - Fixed bug #65156 (Please provide LICENSE file). (Adam)
+- Fixed bug #65378 (radius.c:706: error: too many arguments to function ‘rad_salt_value’). (Adam)
 - Fixed bug #65599 (Fix compiling for VC11 x64). (Jan Ehrhardt)
  </notes>
 
@@ -131,6 +132,7 @@ OS (for example against Windows Active-Directory via IAS).
    <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD</license>
    <notes>
 - Fixed bug #65156 (Please provide LICENSE file). (Adam)
+- Fixed bug #65378 (radius.c:706: error: too many arguments to function ‘rad_salt_value’). (Adam)
 - Fixed bug #65599 (Fix compiling for VC11 x64). (Jan Ehrhardt)
    </notes>
   </release>
