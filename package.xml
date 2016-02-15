@@ -97,6 +97,7 @@ OS (for example against Windows Active-Directory via IAS).
     <file name="radius_server_secret_config.phpt" role="test" />
    </dir>
    <file name="config.m4" role="src" />
+   <file name="config.w32" role="src" />
    <file name="CREDITS" role="doc" />
    <file name="LICENSE" role="doc" />
    <file name="Makefile.in" role="src" />
