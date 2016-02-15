@@ -7,7 +7,7 @@ error_reporting=22527
 <?php
 include dirname(__FILE__).'/server/fake_server.php';
 
-if (FakeServer::skip()) {
+if (\RADIUS\FakeServer\FakeServer::skip()) {
     die('SKIP: pcntl, radius and sockets extensions required');
 }
 ?>
@@ -15,31 +15,31 @@ if (FakeServer::skip()) {
 <?php
 include dirname(__FILE__).'/server/fake_server.php';
 
-$server = new FakeServer;
+$server = new \RADIUS\FakeServer\FakeServer;
 $res = $server->getAuthResource();
 
-$request = Request::expect(RADIUS_ACCESS_REQUEST, array(
-    Attribute::expect(RADIUS_USER_NAME, 'foo'),
+$request = \RADIUS\FakeServer\Request::expect(RADIUS_ACCESS_REQUEST, array(
+    \RADIUS\FakeServer\Attribute\expect(RADIUS_USER_NAME, 'foo'),
 ));
 
-$response = new RadiusResponse;
+$response = new \RADIUS\FakeServer\RadiusResponse;
 $response->code = RADIUS_DISCONNECT_REQUEST;
 $response->attributes = array(
-    Attribute::expect(RADIUS_NAS_IDENTIFIER, 'NAS'),
+    \RADIUS\FakeServer\Attribute\expect(RADIUS_NAS_IDENTIFIER, 'NAS'),
 );
 
 $server->addTransaction($request, $response);
 
-$request = Request::expect(RADIUS_DISCONNECT_NAK, array(
-    Attribute::expect(RADIUS_ERROR_CAUSE, pack('N', RADIUS_ERROR_CAUSE_MISSING_ATTRIBUTE)),
+$request = \RADIUS\FakeServer\Request::expect(RADIUS_DISCONNECT_NAK, array(
+    \RADIUS\FakeServer\Attribute\expect(RADIUS_ERROR_CAUSE, pack('N', RADIUS_ERROR_CAUSE_MISSING_ATTRIBUTE)),
 ));
 
 $server->addTransaction($request, $response);
 
-$request = Request::expect(RADIUS_DISCONNECT_ACK, array(
+$request = \RADIUS\FakeServer\Request::expect(RADIUS_DISCONNECT_ACK, array(
 ));
 
-$response = new RadiusResponse;
+$response = new \RADIUS\FakeServer\RadiusResponse;
 $response->code = RADIUS_DISCONNECT_ACK;
 
 $server->addTransaction($request, $response);
