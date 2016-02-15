@@ -246,7 +246,7 @@ PHP_FUNCTION(radius_add_server)
 {
 	char *hostname, *secret;
 	COMPAT_ARG_SIZE_T hostname_len, secret_len;
-	long  port, timeout, maxtries;
+	COMPAT_ARG_LONG_T port, timeout, maxtries;
 	struct rad_handle *radh;
 	zval *z_radh;
 
@@ -271,7 +271,7 @@ PHP_FUNCTION(radius_add_server)
 /* {{{ proto bool radius_create_request(desc, code) */
 PHP_FUNCTION(radius_create_request)
 {
-	long code;
+	COMPAT_ARG_LONG_T code;
 	struct rad_handle *radh;
 	zval *z_radh;
 
@@ -294,7 +294,7 @@ PHP_FUNCTION(radius_put_string)
 {
 	char *str;
 	COMPAT_ARG_SIZE_T str_len;
-	long type, options = 0, tag = 0;
+	COMPAT_ARG_LONG_T type, options = 0, tag = 0;
 	struct rad_attr_options attr_options;
 	struct rad_handle *radh;
 	zval *z_radh;
@@ -319,7 +319,7 @@ PHP_FUNCTION(radius_put_string)
 /* {{{ proto bool radius_put_int(desc, type, int, options, tag) */
 PHP_FUNCTION(radius_put_int)
 {
-	long type, val, options = 0, tag = 0;
+	COMPAT_ARG_LONG_T type, val, options = 0, tag = 0;
 	struct rad_attr_options attr_options;
 	struct rad_handle *radh;
 	zval *z_radh;
@@ -344,7 +344,7 @@ PHP_FUNCTION(radius_put_int)
 /* {{{ proto bool radius_put_attr(desc, type, data, options, tag) */
 PHP_FUNCTION(radius_put_attr)
 {
-	long type, options = 0, tag = 0;
+	COMPAT_ARG_LONG_T type, options = 0, tag = 0;
 	COMPAT_ARG_SIZE_T len;
 	char *data;
 	struct rad_attr_options attr_options;
@@ -373,7 +373,7 @@ PHP_FUNCTION(radius_put_attr)
 PHP_FUNCTION(radius_put_addr)
 {
 	COMPAT_ARG_SIZE_T addrlen;
-	long type, options = 0, tag = 0;
+	COMPAT_ARG_LONG_T type, options = 0, tag = 0;
 	char	*addr;
 	struct rad_attr_options attr_options;
 	struct rad_handle *radh;
@@ -407,7 +407,7 @@ PHP_FUNCTION(radius_put_vendor_string)
 {
 	char *str;
 	COMPAT_ARG_SIZE_T str_len;
-	long type, vendor, options = 0, tag = 0;
+	COMPAT_ARG_LONG_T type, vendor, options = 0, tag = 0;
 	struct rad_attr_options attr_options;
 	struct rad_handle *radh;
 	zval *z_radh;
@@ -432,7 +432,7 @@ PHP_FUNCTION(radius_put_vendor_string)
 /* {{{ proto bool radius_put_vendor_int(desc, vendor, type, int, options, tag) */
 PHP_FUNCTION(radius_put_vendor_int)
 {
-	long type, vendor, val, options = 0, tag = 0;
+	COMPAT_ARG_LONG_T type, vendor, val, options = 0, tag = 0;
 	struct rad_attr_options attr_options;
 	struct rad_handle *radh;
 	zval *z_radh;
@@ -457,7 +457,7 @@ PHP_FUNCTION(radius_put_vendor_int)
 /* {{{ proto bool radius_put_vendor_attr(desc, vendor, type, data, options, tag) */
 PHP_FUNCTION(radius_put_vendor_attr)
 {
-	long type, vendor, options = 0, tag = 0;
+	COMPAT_ARG_LONG_T type, vendor, options = 0, tag = 0;
 	COMPAT_ARG_SIZE_T len;
 	char *data;
 	struct rad_attr_options attr_options;
@@ -484,7 +484,7 @@ PHP_FUNCTION(radius_put_vendor_attr)
 /* {{{ proto bool radius_put_vendor_addr(desc, vendor, type, addr) */
 PHP_FUNCTION(radius_put_vendor_addr)
 {
-	long type, vendor, options = 0, tag = 0;
+	COMPAT_ARG_LONG_T type, vendor, options = 0, tag = 0;
 	COMPAT_ARG_SIZE_T addrlen;
 	char	*addr;
 	struct rad_attr_options attr_options;
@@ -604,7 +604,7 @@ PHP_FUNCTION(radius_get_tagged_attr_tag)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG((long) *attr);
+	RETURN_LONG((COMPAT_ARG_LONG_T) *attr);
 }
 /* }}} */
 
