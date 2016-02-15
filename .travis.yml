@@ -12,7 +12,7 @@ sudo: false
 script:
   - phpize
   - ./configure
-  - make test
+  - NO_INTERACTION=1 make test
 
 notifications:
   email:
