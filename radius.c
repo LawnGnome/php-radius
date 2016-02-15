@@ -49,10 +49,17 @@ any other GPL-like (LGPL, GPL2) License.
 #include <arpa/inet.h>
 #endif
 
-void _radius_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
+#include "pecl-compat/compat.h"
+
+void _radius_close(zend_resource *res TSRMLS_DC);
 
 static int _init_options(struct rad_attr_options *out, int options, int tag);
 
+#define RADIUS_FETCH_RESOURCE(radh, zv) \
+	radh = (struct rad_handle *)compat_zend_fetch_resource(zv, "rad_handle", le_radius TSRMLS_CC); \
+	if (!radh) { \
+		RETURN_FALSE; \
+	}
 
 /* If you declare any globals in php_radius.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(radius)
@@ -152,34 +159,26 @@ PHP_MINFO_FUNCTION(radius)
 }
 /* }}} */
 
-/* {{{ proto ressource radius_auth_open(string arg) */
+/* {{{ proto resource radius_auth_open(string arg) */
 PHP_FUNCTION(radius_auth_open)
 {
-	radius_descriptor *raddesc;
+	struct rad_handle *radh = rad_auth_open();
 
-	raddesc = emalloc(sizeof(radius_descriptor));
-	raddesc->radh = rad_auth_open();
-
-	if (raddesc->radh != NULL) {
-		ZEND_REGISTER_RESOURCE(return_value, raddesc, le_radius);
-		raddesc->id = Z_LVAL_P(return_value);
+	if (radh != NULL) {
+		compat_zend_register_resource(return_value, radh, le_radius TSRMLS_CC);
 	} else {
 		RETURN_FALSE;
 	}
 }
 /* }}} */
 
-/* {{{ proto ressource radius_acct_open(string arg) */
+/* {{{ proto resource radius_acct_open(string arg) */
 PHP_FUNCTION(radius_acct_open)
 {
-	radius_descriptor *raddesc;
+	struct rad_handle *radh = rad_acct_open();
 
-	raddesc = emalloc(sizeof(radius_descriptor));
-	raddesc->radh = rad_acct_open();
-
-	if (raddesc->radh != NULL) {
-		ZEND_REGISTER_RESOURCE(return_value, raddesc, le_radius);
-		raddesc->id = Z_LVAL_P(return_value);
+	if (radh != NULL) {
+		compat_zend_register_resource(return_value, radh, le_radius TSRMLS_CC);
 	} else {
 		RETURN_FALSE;
 	}
@@ -189,15 +188,16 @@ PHP_FUNCTION(radius_acct_open)
 /* {{{ proto bool radius_close(radh) */
 PHP_FUNCTION(radius_close)
 {
-	radius_descriptor *raddesc;
+	struct rad_handle *radh;
 	zval *z_radh;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_radh) == FAILURE) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
-	zend_list_delete(raddesc->id);
+	/* Fetch the resource to verify it. */
+	RADIUS_FETCH_RESOURCE(radh, z_radh);
+	compat_zend_delete_resource(z_radh TSRMLS_CC);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -206,16 +206,16 @@ PHP_FUNCTION(radius_close)
 PHP_FUNCTION(radius_strerror)
 {
 	char *msg;
-	radius_descriptor *raddesc;
+	struct rad_handle *radh;
 	zval *z_radh;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_radh) == FAILURE) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
-	msg = (char *)rad_strerror(raddesc->radh);
-	RETURN_STRINGL(msg, strlen(msg), 1);
+	RADIUS_FETCH_RESOURCE(radh, z_radh);
+	msg = (char *)rad_strerror(radh);
+	RETURN_STRINGL(msg, strlen(msg));
 }
 /* }}} */
 
@@ -223,17 +223,17 @@ PHP_FUNCTION(radius_strerror)
 PHP_FUNCTION(radius_config)
 {
 	char *filename;
-	int filename_len;
-	radius_descriptor *raddesc;
+	COMPAT_ARG_SIZE_T filename_len;
+	struct rad_handle *radh;
 	zval *z_radh;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_radh, &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
+	RADIUS_FETCH_RESOURCE(radh, z_radh);
 
-	if (rad_config(raddesc->radh, filename) == -1) {
+	if (rad_config(radh, filename) == -1) {
 		RETURN_FALSE;
 	} else {
 		RETURN_TRUE;
@@ -245,9 +245,9 @@ PHP_FUNCTION(radius_config)
 PHP_FUNCTION(radius_add_server)
 {
 	char *hostname, *secret;
-	int hostname_len, secret_len;
+	COMPAT_ARG_SIZE_T hostname_len, secret_len;
 	long  port, timeout, maxtries;
-	radius_descriptor *raddesc;
+	struct rad_handle *radh;
 	zval *z_radh;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rslsll", &z_radh,
@@ -258,9 +258,9 @@ PHP_FUNCTION(radius_add_server)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
+	RADIUS_FETCH_RESOURCE(radh, z_radh);
 
-	if (rad_add_server(raddesc->radh, hostname, port, secret, timeout, maxtries) == -1) {
+	if (rad_add_server(radh, hostname, port, secret, timeout, maxtries) == -1) {
 		RETURN_FALSE;
 	} else {
 		RETURN_TRUE;
@@ -272,16 +272,16 @@ PHP_FUNCTION(radius_add_server)
 PHP_FUNCTION(radius_create_request)
 {
 	long code;
-	radius_descriptor *raddesc;
+	struct rad_handle *radh;
 	zval *z_radh;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &z_radh, &code) == FAILURE) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
+	RADIUS_FETCH_RESOURCE(radh, z_radh);
 
-	if (rad_create_request(raddesc->radh, code) == -1) {
+	if (rad_create_request(radh, code) == -1) {
 		RETURN_FALSE;
 	} else {
 		RETURN_TRUE;
@@ -293,10 +293,10 @@ PHP_FUNCTION(radius_create_request)
 PHP_FUNCTION(radius_put_string)
 {
 	char *str;
-	int str_len;
+	COMPAT_ARG_SIZE_T str_len;
 	long type, options = 0, tag = 0;
 	struct rad_attr_options attr_options;
-	radius_descriptor *raddesc;
+	struct rad_handle *radh;
 	zval *z_radh;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls|ll", &z_radh, &type, &str, &str_len, &options, &tag)
@@ -304,11 +304,11 @@ PHP_FUNCTION(radius_put_string)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
+	RADIUS_FETCH_RESOURCE(radh, z_radh);
 
 	if (_init_options(&attr_options, options, tag) == -1) {
 		RETURN_FALSE;
-	} else if (rad_put_string(raddesc->radh, type, str, &attr_options) == -1) {
+	} else if (rad_put_string(radh, type, str, &attr_options) == -1) {
 		RETURN_FALSE;
 	}
 
@@ -321,7 +321,7 @@ PHP_FUNCTION(radius_put_int)
 {
 	long type, val, options = 0, tag = 0;
 	struct rad_attr_options attr_options;
-	radius_descriptor *raddesc;
+	struct rad_handle *radh;
 	zval *z_radh;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rll|ll", &z_radh, &type, &val, &options, &tag)
@@ -329,11 +329,11 @@ PHP_FUNCTION(radius_put_int)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
+	RADIUS_FETCH_RESOURCE(radh, z_radh);
 
 	if (_init_options(&attr_options, options, tag) == -1) {
 		RETURN_FALSE;
-	} else if (rad_put_int(raddesc->radh, type, val, &attr_options) == -1) {
+	} else if (rad_put_int(radh, type, val, &attr_options) == -1) {
 		RETURN_FALSE;
 	}
 
@@ -345,10 +345,10 @@ PHP_FUNCTION(radius_put_int)
 PHP_FUNCTION(radius_put_attr)
 {
 	long type, options = 0, tag = 0;
-	int len;
+	COMPAT_ARG_SIZE_T len;
 	char *data;
 	struct rad_attr_options attr_options;
-	radius_descriptor *raddesc;
+	struct rad_handle *radh;
 	zval *z_radh;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls|ll", &z_radh, &type, &data, &len, &options, &tag)
@@ -356,11 +356,11 @@ PHP_FUNCTION(radius_put_attr)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
+	RADIUS_FETCH_RESOURCE(radh, z_radh);
 
 	if (_init_options(&attr_options, options, tag) == -1) {
 		RETURN_FALSE;
-	} else if (rad_put_attr(raddesc->radh, type, data, len, &attr_options) == -1) {
+	} else if (rad_put_attr(radh, type, data, len, &attr_options) == -1) {
 		RETURN_FALSE;
 	}
 
@@ -372,11 +372,11 @@ PHP_FUNCTION(radius_put_attr)
 /* {{{ proto bool radius_put_addr(desc, type, addr, options, tag) */
 PHP_FUNCTION(radius_put_addr)
 {
-	int addrlen;
+	COMPAT_ARG_SIZE_T addrlen;
 	long type, options = 0, tag = 0;
 	char	*addr;
 	struct rad_attr_options attr_options;
-	radius_descriptor *raddesc;
+	struct rad_handle *radh;
 	zval *z_radh;
 	struct in_addr intern_addr;
 
@@ -385,7 +385,7 @@ PHP_FUNCTION(radius_put_addr)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
+	RADIUS_FETCH_RESOURCE(radh, z_radh);
 
 	if (inet_aton(addr, &intern_addr) == 0) {
 		zend_error(E_ERROR, "Error converting Address");
@@ -394,7 +394,7 @@ PHP_FUNCTION(radius_put_addr)
 
 	if (_init_options(&attr_options, options, tag) == -1) {
 		RETURN_FALSE;
-	} else if (rad_put_addr(raddesc->radh, type, intern_addr, &attr_options) == -1) {
+	} else if (rad_put_addr(radh, type, intern_addr, &attr_options) == -1) {
 		RETURN_FALSE;
 	}
 
@@ -406,10 +406,10 @@ PHP_FUNCTION(radius_put_addr)
 PHP_FUNCTION(radius_put_vendor_string)
 {
 	char *str;
-	int str_len;
+	COMPAT_ARG_SIZE_T str_len;
 	long type, vendor, options = 0, tag = 0;
 	struct rad_attr_options attr_options;
-	radius_descriptor *raddesc;
+	struct rad_handle *radh;
 	zval *z_radh;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlls|ll", &z_radh, &vendor, &type, &str, &str_len, &options, &tag)
@@ -417,11 +417,11 @@ PHP_FUNCTION(radius_put_vendor_string)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
+	RADIUS_FETCH_RESOURCE(radh, z_radh);
 
 	if (_init_options(&attr_options, options, tag) == -1) {
 		RETURN_FALSE;
-	} else if (rad_put_vendor_string(raddesc->radh, vendor, type, str, &attr_options) == -1) {
+	} else if (rad_put_vendor_string(radh, vendor, type, str, &attr_options) == -1) {
 		RETURN_FALSE;
 	}
 
@@ -434,7 +434,7 @@ PHP_FUNCTION(radius_put_vendor_int)
 {
 	long type, vendor, val, options = 0, tag = 0;
 	struct rad_attr_options attr_options;
-	radius_descriptor *raddesc;
+	struct rad_handle *radh;
 	zval *z_radh;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlll|ll", &z_radh, &vendor, &type, &val, &options, &tag)
@@ -442,11 +442,11 @@ PHP_FUNCTION(radius_put_vendor_int)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
+	RADIUS_FETCH_RESOURCE(radh, z_radh);
 
 	if (_init_options(&attr_options, options, tag) == -1) {
 		RETURN_FALSE;
-	} else if (rad_put_vendor_int(raddesc->radh, vendor, type, val, &attr_options) == -1) {
+	} else if (rad_put_vendor_int(radh, vendor, type, val, &attr_options) == -1) {
 		RETURN_FALSE;
 	}
 
@@ -458,10 +458,10 @@ PHP_FUNCTION(radius_put_vendor_int)
 PHP_FUNCTION(radius_put_vendor_attr)
 {
 	long type, vendor, options = 0, tag = 0;
-	int len;
+	COMPAT_ARG_SIZE_T len;
 	char *data;
 	struct rad_attr_options attr_options;
-	radius_descriptor *raddesc;
+	struct rad_handle *radh;
 	zval *z_radh;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlls|ll", &z_radh, &vendor, &type,
@@ -469,11 +469,11 @@ PHP_FUNCTION(radius_put_vendor_attr)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
+	RADIUS_FETCH_RESOURCE(radh, z_radh);
 
 	if (_init_options(&attr_options, options, tag) == -1) {
 		RETURN_FALSE;
-	} else if (rad_put_vendor_attr(raddesc->radh, vendor, type, data, len, &attr_options) == -1) {
+	} else if (rad_put_vendor_attr(radh, vendor, type, data, len, &attr_options) == -1) {
 		RETURN_FALSE;
 	}
 
@@ -485,10 +485,10 @@ PHP_FUNCTION(radius_put_vendor_attr)
 PHP_FUNCTION(radius_put_vendor_addr)
 {
 	long type, vendor, options = 0, tag = 0;
-	int addrlen;
+	COMPAT_ARG_SIZE_T addrlen;
 	char	*addr;
 	struct rad_attr_options attr_options;
-	radius_descriptor *raddesc;
+	struct rad_handle *radh;
 	zval *z_radh;
 	struct in_addr intern_addr;
 
@@ -497,7 +497,7 @@ PHP_FUNCTION(radius_put_vendor_addr)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
+	RADIUS_FETCH_RESOURCE(radh, z_radh);
 
 	if (inet_aton(addr, &intern_addr) == 0) {
 		zend_error(E_ERROR, "Error converting Address");
@@ -506,7 +506,7 @@ PHP_FUNCTION(radius_put_vendor_addr)
 
 	if (_init_options(&attr_options, options, tag) == -1) {
 		RETURN_FALSE;
-	} else if (rad_put_vendor_addr(raddesc->radh, vendor, type, intern_addr, &attr_options) == -1) {
+	} else if (rad_put_vendor_addr(radh, vendor, type, intern_addr, &attr_options) == -1) {
 		RETURN_FALSE;
 	}
 
@@ -517,7 +517,7 @@ PHP_FUNCTION(radius_put_vendor_addr)
 /* {{{ proto bool radius_send_request(desc) */
 PHP_FUNCTION(radius_send_request)
 {
-	radius_descriptor *raddesc;
+	struct rad_handle *radh;
 	zval *z_radh;
 	int res;
 
@@ -526,9 +526,9 @@ PHP_FUNCTION(radius_send_request)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
+	RADIUS_FETCH_RESOURCE(radh, z_radh);
 
-	res = rad_send_request(raddesc->radh);
+	res = rad_send_request(radh);
 	if (res == -1) {
 		RETURN_FALSE;
 	} else {
@@ -540,7 +540,7 @@ PHP_FUNCTION(radius_send_request)
 /* {{{ proto string radius_get_attr(desc) */
 PHP_FUNCTION(radius_get_attr)
 {
-	radius_descriptor *raddesc;
+	struct rad_handle *radh;
 	int res;
 	const void *data;
 	size_t len;
@@ -550,9 +550,9 @@ PHP_FUNCTION(radius_get_attr)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
+	RADIUS_FETCH_RESOURCE(radh, z_radh);
 
-	res = rad_get_attr(raddesc->radh, &data, &len);
+	res = rad_get_attr(radh, &data, &len);
 	if (res == -1) {
 		RETURN_FALSE;
 	} else {
@@ -560,7 +560,7 @@ PHP_FUNCTION(radius_get_attr)
 
 			array_init(return_value);
 			add_assoc_long(return_value, "attr", res);
-			add_assoc_stringl(return_value, "data", (char *) data, len, 1);
+			add_assoc_stringl(return_value, "data", (char *) data, len);
 			return;
 		}
 		RETURN_LONG(res);
@@ -572,7 +572,7 @@ PHP_FUNCTION(radius_get_attr)
 PHP_FUNCTION(radius_get_tagged_attr_data)
 {
 	const char *attr;
-	int len;
+	COMPAT_ARG_SIZE_T len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &attr, &len) == FAILURE) {
 		return;
@@ -585,7 +585,7 @@ PHP_FUNCTION(radius_get_tagged_attr_data)
 		RETURN_EMPTY_STRING();
 	}
 
-	RETURN_STRINGL(attr + 1, len - 1, 1);
+	RETURN_STRINGL(attr + 1, len - 1);
 }
 /* }}} */
 
@@ -593,7 +593,7 @@ PHP_FUNCTION(radius_get_tagged_attr_data)
 PHP_FUNCTION(radius_get_tagged_attr_tag)
 {
 	const char *attr;
-	int len;
+	COMPAT_ARG_SIZE_T len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &attr, &len) == FAILURE) {
 		return;
@@ -612,7 +612,7 @@ PHP_FUNCTION(radius_get_tagged_attr_tag)
 PHP_FUNCTION(radius_get_vendor_attr)
 {
 	const void *data, *raw;
-	int len;
+	COMPAT_ARG_SIZE_T len;
 	u_int32_t vendor;
 	unsigned char type;
 	size_t data_len;
@@ -628,7 +628,7 @@ PHP_FUNCTION(radius_get_vendor_attr)
 		array_init(return_value);
 		add_assoc_long(return_value, "attr", type);
 		add_assoc_long(return_value, "vendor", vendor);
-		add_assoc_stringl(return_value, "data", (char *) data, data_len, 1);
+		add_assoc_stringl(return_value, "data", (char *) data, data_len);
 		return;
 	}
 }
@@ -639,7 +639,7 @@ PHP_FUNCTION(radius_cvt_addr)
 {
 	const void *data;
 	char *addr_dot;
-	int len;
+	COMPAT_ARG_SIZE_T len;
 	struct in_addr addr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &len) == FAILURE) {
@@ -648,7 +648,7 @@ PHP_FUNCTION(radius_cvt_addr)
 
 	addr = rad_cvt_addr(data);
 	addr_dot = inet_ntoa(addr);
-	RETURN_STRINGL(addr_dot, strlen(addr_dot), 1);
+	RETURN_STRINGL(addr_dot, strlen(addr_dot));
 }
 /* }}} */
 
@@ -656,7 +656,8 @@ PHP_FUNCTION(radius_cvt_addr)
 PHP_FUNCTION(radius_cvt_int)
 {
 	const void *data;
-	int len, val;
+	COMPAT_ARG_SIZE_T len;
+	int val;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &len)
 		== FAILURE) {
@@ -673,7 +674,7 @@ PHP_FUNCTION(radius_cvt_string)
 {
 	const void *data;
 	char *val;
-	int len;
+	COMPAT_ARG_SIZE_T len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &len)
 		== FAILURE) {
@@ -682,7 +683,7 @@ PHP_FUNCTION(radius_cvt_string)
 
 	val = rad_cvt_string(data, len);
 	if (val == NULL) RETURN_FALSE;
-	RETVAL_STRINGL(val, strlen(val), 1);
+	RETVAL_STRINGL(val, strlen(val));
 	free(val);
 	return;
 }
@@ -692,8 +693,8 @@ PHP_FUNCTION(radius_cvt_string)
 PHP_FUNCTION(radius_salt_encrypt_attr)
 {
 	char *data;
-	int len;
-	radius_descriptor *raddesc;
+	COMPAT_ARG_SIZE_T len;
+	struct rad_handle *radh;
 	struct rad_salted_value salted;
 	zval *z_radh;
 
@@ -701,16 +702,16 @@ PHP_FUNCTION(radius_salt_encrypt_attr)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
+	RADIUS_FETCH_RESOURCE(radh, z_radh);
 
-	if (rad_salt_value(raddesc->radh, data, len, &salted) == -1) {
-		zend_error(E_WARNING, "%s", rad_strerror(raddesc->radh));
+	if (rad_salt_value(radh, data, len, &salted) == -1) {
+		zend_error(E_WARNING, "%s", rad_strerror(radh));
 		RETURN_FALSE;
 	} else if (salted.len == 0) {
 		RETURN_EMPTY_STRING();
 	}
 
-	RETVAL_STRINGL(salted.data, salted.len, 1);
+	RETVAL_STRINGL(salted.data, salted.len);
 	efree(salted.data);
 }
 /* }}} */
@@ -718,7 +719,7 @@ PHP_FUNCTION(radius_salt_encrypt_attr)
 /* {{{ proto string radius_request_authenticator(radh) */
 PHP_FUNCTION(radius_request_authenticator)
 {
-	radius_descriptor *raddesc;
+	struct rad_handle *radh;
 	ssize_t res;
 	char buf[LEN_AUTH];
 	zval *z_radh;
@@ -727,13 +728,13 @@ PHP_FUNCTION(radius_request_authenticator)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
+	RADIUS_FETCH_RESOURCE(radh, z_radh);
 
-	res = rad_request_authenticator(raddesc->radh, buf, sizeof buf);
+	res = rad_request_authenticator(radh, buf, sizeof buf);
 	if (res == -1) {
 		RETURN_FALSE;
 	} else {
-		RETURN_STRINGL(buf, res, 1);
+		RETURN_STRINGL(buf, res);
 	}
 }
 /* }}} */
@@ -742,18 +743,18 @@ PHP_FUNCTION(radius_request_authenticator)
 PHP_FUNCTION(radius_server_secret)
 {
 	char *secret;
-	radius_descriptor *raddesc;
+	struct rad_handle *radh;
 	zval *z_radh;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_radh) == FAILURE) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
-	secret = (char *)rad_server_secret(raddesc->radh);
+	RADIUS_FETCH_RESOURCE(radh, z_radh);
+	secret = (char *)rad_server_secret(radh);
 
 	if (secret) {
-		RETURN_STRINGL(secret, strlen(secret), 1);
+		RETURN_STRINGL(secret, strlen(secret));
 	}
 
 	RETURN_FALSE;
@@ -763,26 +764,27 @@ PHP_FUNCTION(radius_server_secret)
 /* {{{ proto string radius_demangle(radh, mangled) */
 PHP_FUNCTION(radius_demangle)
 {
-	radius_descriptor *raddesc;
+	struct rad_handle *radh;
 	zval *z_radh;
 	const void *mangled;
 	unsigned char *buf;
-	int len, res;
+	COMPAT_ARG_SIZE_T len;
+	int res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_radh, &mangled, &len) == FAILURE) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
+	RADIUS_FETCH_RESOURCE(radh, z_radh);
 
 	buf = emalloc(len);
-	res = rad_demangle(raddesc->radh, mangled, len, buf);
+	res = rad_demangle(radh, mangled, len, buf);
 
 	if (res == -1) {
 		efree(buf);
 		RETURN_FALSE;
 	} else {
-		RETVAL_STRINGL((char *) buf, len, 1);
+		RETVAL_STRINGL((char *) buf, len);
 		efree(buf);
 		return;
 	}
@@ -792,26 +794,27 @@ PHP_FUNCTION(radius_demangle)
 /* {{{ proto string radius_demangle_mppe_key(radh, mangled) */
 PHP_FUNCTION(radius_demangle_mppe_key)
 {
-	radius_descriptor *raddesc;
+	struct rad_handle *radh;
 	zval *z_radh;
 	const void *mangled;
 	unsigned char *buf;
 	size_t dlen;
-	int len, res;
+	COMPAT_ARG_SIZE_T len;
+	int res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_radh, &mangled, &len) == FAILURE) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(raddesc, radius_descriptor *, &z_radh, -1, "rad_handle", le_radius);
+	RADIUS_FETCH_RESOURCE(radh, z_radh);
 
 	buf = emalloc(len);
-	res = rad_demangle_mppe_key(raddesc->radh, mangled, len, buf, &dlen);
+	res = rad_demangle_mppe_key(radh, mangled, len, buf, &dlen);
 	if (res == -1) {
 		efree(buf);
 		RETURN_FALSE;
 	} else {
-		RETVAL_STRINGL((char *) buf, dlen, 1);
+		RETVAL_STRINGL((char *) buf, dlen);
 		efree(buf);
 		return;
 	}
@@ -841,11 +844,11 @@ int _init_options(struct rad_attr_options *out, int options, int tag) {
 /* }}} */
 
 /* {{{ _radius_close() */
-void _radius_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+void _radius_close(zend_resource *res TSRMLS_DC)
 {
-	radius_descriptor *raddesc = (radius_descriptor *)rsrc->ptr;
-	rad_close(raddesc->radh);
-	efree(raddesc);
+	struct rad_handle *radh = (struct rad_handle *)res->ptr;
+	rad_close(radh);
+	res->ptr = NULL;
 }
 /* }}} */
 

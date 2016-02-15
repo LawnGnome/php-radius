@@ -53,11 +53,6 @@ any other GPL-like (LGPL, GPL2) License.
 
 extern zend_module_entry radius_module_entry;
 
-typedef struct {
-	int id;
-	struct rad_handle *radh;
-} radius_descriptor;
-
 PHP_MINIT_FUNCTION(radius);
 PHP_MSHUTDOWN_FUNCTION(radius);
 PHP_MINFO_FUNCTION(radius);
