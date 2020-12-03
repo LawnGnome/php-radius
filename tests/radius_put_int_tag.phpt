@@ -7,7 +7,7 @@ error_reporting=22527
 <?php
 include dirname(__FILE__).'/server/fake_server.php';
 
-if (FakeServer::skip()) {
+if (\RADIUS\FakeServer\FakeServer::skip()) {
     die('SKIP: pcntl, radius and sockets extensions required');
 }
 ?>
@@ -15,19 +15,19 @@ if (FakeServer::skip()) {
 <?php
 include dirname(__FILE__).'/server/fake_server.php';
 
-$server = new FakeServer;
+$server = new \RADIUS\FakeServer\FakeServer;
 $res = $server->getAuthResource();
 
-$request = Request::expect(RADIUS_ACCESS_REQUEST, array(
-    Attribute::expect(RADIUS_USER_NAME, 'foo'),
-    Attribute::expect(RADIUS_NAS_PORT, pack('N', 1234), 10),
-    Attribute::expect(RADIUS_LOGIN_TCP_PORT, pack('N', 2345), 10, true),
+$request = \RADIUS\FakeServer\Request::expect(RADIUS_ACCESS_REQUEST, array(
+    \RADIUS\FakeServer\Attribute\expect(RADIUS_USER_NAME, 'foo'),
+    \RADIUS\FakeServer\Attribute\expect(RADIUS_NAS_PORT, pack('N', 1234), 10),
+    \RADIUS\FakeServer\Attribute\expect(RADIUS_LOGIN_TCP_PORT, pack('N', 2345), 10, true),
 ));
 
-$response = new RadiusResponse;
+$response = new \RADIUS\FakeServer\RadiusResponse;
 $response->code = RADIUS_ACCESS_REJECT;
 $response->attributes = array(
-    Attribute::expect(RADIUS_REPLY_MESSAGE, 'Go away'),
+    \RADIUS\FakeServer\Attribute\expect(RADIUS_REPLY_MESSAGE, 'Go away'),
 );
 
 $server->addTransaction($request, $response);
