@@ -748,7 +748,7 @@ rad_auth_open(void)
 
 	h = (struct rad_handle *)malloc(sizeof(struct rad_handle));
 	if (h != NULL) {
-		php_srand(time(NULL) * getpid() * (unsigned long) (php_combined_lcg(NULL) * 10000.0));
+		php_srand(time(NULL) * getpid() * (unsigned long) (php_combined_lcg() * 10000.0));
 		h->fd = -1;
 		h->num_servers = 0;
 		h->ident = php_rand();
