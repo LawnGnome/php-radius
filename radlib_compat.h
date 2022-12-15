@@ -83,6 +83,14 @@ char *strsep(char **stringp,	const char *delim);
 	} while (0)
 #endif
 
+#ifndef TSRMLS_D
+#define TSRMLS_D void
+#define TSRMLS_DC
+#define TSRMLS_C
+#define TSRMLS_CC
+#define TSRMLS_FETCH()
+#endif
+
 #endif
 
 /* vim: set ts=8 sw=8 noet: */

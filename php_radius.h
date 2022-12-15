@@ -101,6 +101,14 @@ PHP_FUNCTION(radius_demangle_mppe_key);
 #define RADIUS_OPTION_TAGGED	RAD_OPTION_TAG
 #define RADIUS_OPTION_SALT	RAD_OPTION_SALT
 
+#ifndef TSRMLS_D
+#define TSRMLS_D void
+#define TSRMLS_DC
+#define TSRMLS_C
+#define TSRMLS_CC
+#define TSRMLS_FETCH()
+#endif
+
 #endif	/* PHP_RADIUS_H */
 
 
