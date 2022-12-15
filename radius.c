@@ -51,12 +51,12 @@ any other GPL-like (LGPL, GPL2) License.
 
 #include "pecl-compat/compat.h"
 
-void _radius_close(zend_resource *res TSRMLS_DC);
+void _radius_close(zend_resource *res);
 
 static int _init_options(struct rad_attr_options *out, int options, int tag);
 
 #define RADIUS_FETCH_RESOURCE(radh, zv) \
-	radh = (struct rad_handle *)compat_zend_fetch_resource(zv, "rad_handle", le_radius TSRMLS_CC); \
+	radh = (struct rad_handle *)compat_zend_fetch_resource(zv, "rad_handle", le_radius); \
 	if (!radh) { \
 		RETURN_FALSE; \
 	}
@@ -325,7 +325,7 @@ PHP_FUNCTION(radius_auth_open)
 	struct rad_handle *radh = rad_auth_open();
 
 	if (radh != NULL) {
-		compat_zend_register_resource(return_value, radh, le_radius TSRMLS_CC);
+		compat_zend_register_resource(return_value, radh, le_radius);
 	} else {
 		RETURN_FALSE;
 	}
@@ -338,7 +338,7 @@ PHP_FUNCTION(radius_acct_open)
 	struct rad_handle *radh = rad_acct_open();
 
 	if (radh != NULL) {
-		compat_zend_register_resource(return_value, radh, le_radius TSRMLS_CC);
+		compat_zend_register_resource(return_value, radh, le_radius);
 	} else {
 		RETURN_FALSE;
 	}
@@ -351,13 +351,13 @@ PHP_FUNCTION(radius_close)
 	struct rad_handle *radh;
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_radh) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_radh) == FAILURE) {
 		return;
 	}
 
 	/* Fetch the resource to verify it. */
 	RADIUS_FETCH_RESOURCE(radh, z_radh);
-	compat_zend_delete_resource(z_radh TSRMLS_CC);
+	compat_zend_delete_resource(z_radh);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -369,7 +369,7 @@ PHP_FUNCTION(radius_strerror)
 	struct rad_handle *radh;
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_radh) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_radh) == FAILURE) {
 		return;
 	}
 
@@ -387,7 +387,7 @@ PHP_FUNCTION(radius_config)
 	struct rad_handle *radh;
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_radh, &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &z_radh, &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
@@ -410,7 +410,7 @@ PHP_FUNCTION(radius_add_server)
 	struct rad_handle *radh;
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rslsll", &z_radh,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rslsll", &z_radh,
 		&hostname, &hostname_len,
 		&port,
 		&secret, &secret_len,
@@ -435,7 +435,7 @@ PHP_FUNCTION(radius_create_request)
 	struct rad_handle *radh;
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &z_radh, &code) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &z_radh, &code) == FAILURE) {
 		return;
 	}
 
@@ -459,7 +459,7 @@ PHP_FUNCTION(radius_put_string)
 	struct rad_handle *radh;
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls|ll", &z_radh, &type, &str, &str_len, &options, &tag)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rls|ll", &z_radh, &type, &str, &str_len, &options, &tag)
 		== FAILURE) {
 		return;
 	}
@@ -484,7 +484,7 @@ PHP_FUNCTION(radius_put_int)
 	struct rad_handle *radh;
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rll|ll", &z_radh, &type, &val, &options, &tag)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rll|ll", &z_radh, &type, &val, &options, &tag)
 		== FAILURE) {
 		return;
 	}
@@ -511,7 +511,7 @@ PHP_FUNCTION(radius_put_attr)
 	struct rad_handle *radh;
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls|ll", &z_radh, &type, &data, &len, &options, &tag)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rls|ll", &z_radh, &type, &data, &len, &options, &tag)
 		== FAILURE) {
 		return;
 	}
@@ -540,7 +540,7 @@ PHP_FUNCTION(radius_put_addr)
 	zval *z_radh;
 	struct in_addr intern_addr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls|ll", &z_radh, &type, &addr, &addrlen, &options, &tag)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rls|ll", &z_radh, &type, &addr, &addrlen, &options, &tag)
 		== FAILURE) {
 		return;
 	}
@@ -572,7 +572,7 @@ PHP_FUNCTION(radius_put_vendor_string)
 	struct rad_handle *radh;
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlls|ll", &z_radh, &vendor, &type, &str, &str_len, &options, &tag)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlls|ll", &z_radh, &vendor, &type, &str, &str_len, &options, &tag)
 		== FAILURE) {
 		return;
 	}
@@ -597,7 +597,7 @@ PHP_FUNCTION(radius_put_vendor_int)
 	struct rad_handle *radh;
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlll|ll", &z_radh, &vendor, &type, &val, &options, &tag)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlll|ll", &z_radh, &vendor, &type, &val, &options, &tag)
 		== FAILURE) {
 		return;
 	}
@@ -624,7 +624,7 @@ PHP_FUNCTION(radius_put_vendor_attr)
 	struct rad_handle *radh;
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlls|ll", &z_radh, &vendor, &type,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlls|ll", &z_radh, &vendor, &type,
 		&data, &len, &options, &tag) == FAILURE) {
 		return;
 	}
@@ -652,7 +652,7 @@ PHP_FUNCTION(radius_put_vendor_addr)
 	zval *z_radh;
 	struct in_addr intern_addr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlls|ll", &z_radh, &vendor,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlls|ll", &z_radh, &vendor,
 		&type, &addr, &addrlen, &options, &tag) == FAILURE) {
 		return;
 	}
@@ -681,7 +681,7 @@ PHP_FUNCTION(radius_send_request)
 	zval *z_radh;
 	int res;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_radh)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_radh)
 		== FAILURE) {
 		return;
 	}
@@ -706,7 +706,7 @@ PHP_FUNCTION(radius_get_attr)
 	size_t len;
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_radh) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_radh) == FAILURE) {
 		return;
 	}
 
@@ -734,7 +734,7 @@ PHP_FUNCTION(radius_get_tagged_attr_data)
 	const char *attr;
 	COMPAT_ARG_SIZE_T len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &attr, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &attr, &len) == FAILURE) {
 		return;
 	}
 
@@ -755,7 +755,7 @@ PHP_FUNCTION(radius_get_tagged_attr_tag)
 	const char *attr;
 	COMPAT_ARG_SIZE_T len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &attr, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &attr, &len) == FAILURE) {
 		return;
 	}
 
@@ -777,7 +777,7 @@ PHP_FUNCTION(radius_get_vendor_attr)
 	unsigned char type;
 	size_t data_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &raw, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &raw, &len) == FAILURE) {
 		return;
 	}
 
@@ -802,7 +802,7 @@ PHP_FUNCTION(radius_cvt_addr)
 	COMPAT_ARG_SIZE_T len;
 	struct in_addr addr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &data, &len) == FAILURE) {
 		return;
 	}
 
@@ -819,7 +819,7 @@ PHP_FUNCTION(radius_cvt_int)
 	COMPAT_ARG_SIZE_T len;
 	int val;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &len)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &data, &len)
 		== FAILURE) {
 		return;
 	}
@@ -836,7 +836,7 @@ PHP_FUNCTION(radius_cvt_string)
 	char *val;
 	COMPAT_ARG_SIZE_T len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &len)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &data, &len)
 		== FAILURE) {
 		return;
 	}
@@ -858,7 +858,7 @@ PHP_FUNCTION(radius_salt_encrypt_attr)
 	struct rad_salted_value salted;
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_radh, &data, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &z_radh, &data, &len) == FAILURE) {
 		return;
 	}
 
@@ -884,7 +884,7 @@ PHP_FUNCTION(radius_request_authenticator)
 	char buf[LEN_AUTH];
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_radh) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_radh) == FAILURE) {
 		return;
 	}
 
@@ -906,7 +906,7 @@ PHP_FUNCTION(radius_server_secret)
 	struct rad_handle *radh;
 	zval *z_radh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_radh) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_radh) == FAILURE) {
 		return;
 	}
 
@@ -931,7 +931,7 @@ PHP_FUNCTION(radius_demangle)
 	COMPAT_ARG_SIZE_T len;
 	int res;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_radh, &mangled, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &z_radh, &mangled, &len) == FAILURE) {
 		return;
 	}
 
@@ -962,7 +962,7 @@ PHP_FUNCTION(radius_demangle_mppe_key)
 	COMPAT_ARG_SIZE_T len;
 	int res;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_radh, &mangled, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &z_radh, &mangled, &len) == FAILURE) {
 		return;
 	}
 
@@ -1004,7 +1004,7 @@ int _init_options(struct rad_attr_options *out, int options, int tag) {
 /* }}} */
 
 /* {{{ _radius_close() */
-void _radius_close(zend_resource *res TSRMLS_DC)
+void _radius_close(zend_resource *res)
 {
 	struct rad_handle *radh = (struct rad_handle *)res->ptr;
 	rad_close(radh);
