@@ -39,7 +39,7 @@ any other GPL-like (LGPL, GPL2) License.
 
 #define phpext_radius_ptr &radius_module_entry
 
-#define PHP_RADIUS_VERSION "1.3.0"
+#define PHP_RADIUS_VERSION "1.4.0b1"
 
 #ifdef PHP_WIN32
 #define PHP_RADIUS_API __declspec(dllexport)
@@ -52,11 +52,6 @@ any other GPL-like (LGPL, GPL2) License.
 #endif
 
 extern zend_module_entry radius_module_entry;
-
-typedef struct {
-	int id;
-	struct rad_handle *radh;
-} radius_descriptor;
 
 PHP_MINIT_FUNCTION(radius);
 PHP_MSHUTDOWN_FUNCTION(radius);

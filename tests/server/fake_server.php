@@ -3,224 +3,13 @@
 /**
  * A basic set of classes that allow a RADIUS server to be mocked.
  *
- * Note that the code here is intentionally coded to allow PHP 4 usage. The
- * minimum requirement should be PHP 4.1.0, due to the use of pcntl_fork().
- *
  * @author Adam Harvey <aharvey@php.net>
  */
 
-/** An attribute in a RADIUS request or response. */
-class Attribute {
-    /**
-     * The number of bytes consumed when parsing.
-     *
-     * @var integer $consumed
-     */
-    var $consumed;
+namespace RADIUS\FakeServer;
 
-    /**
-     * Whether the attribute is salted.
-     *
-     * @var boolean $salted
-     */
-    var $salted = false;
-
-    /**
-     * An optional attribute tag.
-     *
-     * @var integer $tag
-     */
-    var $tag;
-
-    /**
-     * The attribute type.
-     *
-     * @var integer $type
-     */
-    var $type;
-
-    /**
-     * The attribute value.
-     *
-     * @var string $value
-     */
-    var $value;
-
-    /**
-     * Compares two attributes for equality.
-     *
-     * @static
-     * @param Attribute $expected
-     * @param Attribute $actual
-     * @return boolean
-     */
-    function compare($expected, $actual) {
-        if (is_a($expected, 'VendorSpecificAttribute')) {
-            if (!is_a($actual, 'VendorSpecificAttribute')) {
-                return false;
-            }
-
-            if ($expected->salted) {
-                $expectedLength = (16 * ceil(strlen($expected->value) / 16) + 3);
-
-                if ($expected->tag) {
-                    $tag = unpack('Ctag', $actual->value);
-                    return (($expected->type == $actual->type) && (strlen($actual->value) == $expectedLength + 1) && ($expected->tag == $tag['tag']));
-                } else {
-                    return (($expected->type == $actual->type) && (strlen($actual->value) == $expectedLength));
-                }
-            } else {
-                return ($expected->type == $actual->type) && ($expected->value == $actual->value) && ($expected->vendorId == $actual->vendorId) && ($expected->vendorType == $actual->vendorType);
-            }
-            $expectedLength = (16 * ceil(strlen($expected->value) / 16) + 3);
-
-            if ($expected->tag) {
-                $tag = unpack('Ctag', $actual->value);
-                return (($expected->type == $actual->type) && (strlen($actual->value) == $expectedLength + 1) && ($expected->tag == $tag['tag']));
-            } else {
-                return (($expected->type == $actual->type) && (strlen($actual->value) == $expectedLength));
-            }
-        } elseif ($expected->salted) {
-            $expectedLength = (16 * ceil(strlen($expected->value) / 16) + 3);
-
-            if ($expected->tag) {
-                $tag = unpack('Ctag', $actual->value);
-                return (($expected->type == $actual->type) && (strlen($actual->value) == $expectedLength + 1) && ($expected->tag == $tag['tag']));
-            } else {
-                return (($expected->type == $actual->type) && (strlen($actual->value) == $expectedLength));
-            }
-        } else {
-            return ($expected->type == $actual->type) && ($expected->value == $actual->value);
-        }
-    }
-
-    /**
-     * Creates an attribute with the given type and value.
-     *
-     * @static
-     * @param integer $type
-     * @param string  $value
-     * @param integer $tag
-     * @return Attribute
-     */
-    function expect($type, $value, $tag = null, $salted = false) {
-        $attribute = new Attribute;
-
-        $attribute->salted = $salted;
-        $attribute->type = $type;
-
-        if (!is_null($tag)) {
-            $attribute->tag = $tag;
-            $attribute->value = pack('C', $tag).$value;
-        } else {
-            $attribute->value = $value;
-        }
-
-        return $attribute;
-    }
-
-    /**
-     * Parses the given attribute from a RADIUS packet.
-     *
-     * The error checking here is minimal, to say the least. We don't even
-     * check the size field is valid.
-     *
-     * @static
-     * @param string $raw
-     * @return Attribute
-     */
-    function parse($raw) {
-        $attribute = new Attribute;
-        $data = unpack('Ctype/Csize', $raw);
-
-        if ($data['type'] == RADIUS_VENDOR_SPECIFIC) {
-            return VendorSpecificAttribute::parse($raw);
-        }
-
-        $attribute->consumed = $data['size'];
-        $attribute->type = $data['type'];
-        $attribute->value = substr($raw, 2, $data['size'] - 2);
-
-        return $attribute;
-    }
-
-    /**
-     * Serialises the attribute into the RADIUS wire structure.
-     *
-     * @return string
-     */
-    function serialise() {
-        return pack('CC', $this->type, strlen($this->value) + 2).$this->value;
-    }
-}
-
-/** A vendor specific attribute. */
-class VendorSpecificAttribute extends Attribute {
-    /**
-     * The vendor ID.
-     *
-     * @var integer $vendorId
-     */
-    var $vendorId;
-
-    /**
-     * The vendor type.
-     *
-     * @var integer $vendorType
-     */
-    var $vendorType;
-
-    /**
-     * Creates a vendor specific attribute with the given ID, type and value.
-     *
-     * @static
-     * @param integer $vendorId
-     * @param integer $vendorType
-     * @param string  $value
-     * @param integer $tag
-     * @return VendorSpecificAttribute
-     */
-    function expect($vendorId, $vendorType, $value, $tag = null, $salted = false) {
-        $attribute = new VendorSpecificAttribute;
-
-        $attribute->salted = $salted;
-        $attribute->type = RADIUS_VENDOR_SPECIFIC;
-        $attribute->vendorId = $vendorId;
-        $attribute->vendorType = $vendorType;
-
-        if (!is_null($tag)) {
-            $attribute->tag = $tag;
-            $attribute->value = pack('C', $tag).$value;
-        } else {
-            $attribute->value = $value;
-        }
-
-        return $attribute;
-    }
-
-    /** {@inheritDoc} */
-    function parse($raw) {
-        $attribute = new VendorSpecificAttribute;
-        $attribute->type = RADIUS_VENDOR_SPECIFIC;
-        $data = unpack('Ctype/Csize/NvendorId/CvendorType/CvendorSize', $raw);
-
-        if ($data['type'] != RADIUS_VENDOR_SPECIFIC) {
-            trigger_error('VendorSpecificAttribute::parse() called for a non-VS attribute', E_USER_ERROR);
-        }
-
-        $attribute->consumed = $data['size'];
-        $attribute->vendorId = $data['vendorId'];
-        $attribute->vendorType = $data['vendorType'];
-        $attribute->value = substr($raw, 8, $data['vendorSize'] - 2);
-
-        return $attribute;
-    }
-
-    /** {@inheritDoc} */
-    function serialise() {
-        return pack('CCNCC', $this->type, strlen($this->value) + 8, $this->vendorId, $this->vendorType, strlen($this->value) + 2);
-    }
-}
+require __DIR__.'/attribute.php';
+require __DIR__.'/vsa.php';
 
 /** A RADIUS request. */
 class Request {
@@ -264,12 +53,11 @@ class Request {
      *
      * If the comparison fails, the error message is printed.
      *
-     * @static
      * @param Request $expected
      * @param Request $actual
      * @return boolean
      */
-    function compare($expected, $actual) {
+    static function compare($expected, $actual) {
         if ($expected->code != $actual->code) {
             printf("Expected code %d does not match actual code %d\n", $expected->code, $actual->code);
             return false;
@@ -279,7 +67,7 @@ class Request {
             $found = false;
 
             foreach ($actual->attributes as $actual_attr) {
-                if (Attribute::compare($attribute, $actual_attr)) {
+                if (\RADIUS\FakeServer\Attribute\compare($attribute, $actual_attr)) {
                     $found = true;
                     break;
                 }
@@ -297,12 +85,11 @@ class Request {
     /**
      * Creates a new Request with the given code and attributes.
      *
-     * @static
      * @param integer     $code
      * @param Attribute[] $attributes
      * @return Request
      */
-    function expect($code, $attributes = array()) {
+    static function expect($code, $attributes = array()) {
         $request = new Request;
 
         $request->code = $code;
@@ -314,11 +101,10 @@ class Request {
     /**
      * Parses a RADIUS request packet.
      *
-     * @static
      * @param string $raw
      * @return Request
      */
-    function parse($raw) {
+    static function parse($raw) {
         $request = new Request;
         $data = unpack('Ccode/Cid/nsize', $raw);
 
@@ -329,7 +115,7 @@ class Request {
         $attributes = substr($raw, 20);
 
         while (strlen($attributes)) {
-            $attribute = Attribute::parse($attributes);
+            $attribute = \RADIUS\FakeServer\Attribute\parse($attributes);
             $attributes = substr($attributes, $attribute->consumed);
             $request->attributes[] = $attribute;
         }
