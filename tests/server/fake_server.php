@@ -321,8 +321,8 @@ class FakeServer {
      *
      * @return boolean
      */
-    function skip() {
-        return !(function_exists('socket_create') && function_exists('pcntl_fork') && function_exists('radius_acct_open'));
+    static function skip() {
+        return !(extension_loaded('sockets') && extension_loaded('pcntl') && extension_loaded('radius'));
     }
 
     /**
