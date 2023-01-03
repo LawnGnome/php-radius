@@ -497,7 +497,7 @@ rad_continue_send_request(struct rad_handle *h, int selected, int *fd,
 
 	if (selected) {
 		struct sockaddr_in from;
-		int fromlen;
+		socklen_t fromlen;
 
 		fromlen = sizeof from;
 		h->resp_len = recvfrom(h->fd, h->response,
@@ -1033,7 +1033,7 @@ rad_put_vendor_attr(struct rad_handle *h, int vendor, int type,
 	/* OK, allocate and start building the attribute. */
 	attr = emalloc(va_len);
 	if (attr == NULL) {
-		generr(h, "malloc failure (%d bytes)", va_len);
+		generr(h, "malloc failure (%lu bytes)", va_len);
 		goto end;
 	}
 
@@ -1216,12 +1216,12 @@ rad_demangle_mppe_key(struct rad_handle *h, const void *mangled, size_t mlen, u_
 	*/
 	*len = *P;
 	if (*len > mlen - 1) {
-		generr(h, "Mangled data seems to be garbage %d %d", *len, mlen-1);        
+		generr(h, "Mangled data seems to be garbage %lu %lu", *len, mlen-1);
 		return -1;
 	}
 
 	if (*len > MPPE_KEY_LEN) {
-		generr(h, "Key to long (%d) for me max. %d", *len, MPPE_KEY_LEN);        
+		generr(h, "Key to long (%lu) for me max. %d", *len, MPPE_KEY_LEN);
 		return -1;
 	}
 
@@ -1233,7 +1233,7 @@ int rad_salt_value(struct rad_handle *h, const char *in, size_t len, struct rad_
 {
 	char authenticator[16];
 	size_t i;
-	char intermediate[16];
+	unsigned char intermediate[16];
 	const char *in_pos;
 	MD5_CTX md5;
 	char *out_pos;
