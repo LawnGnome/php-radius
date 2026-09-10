@@ -22,7 +22,7 @@ OS (for example against Windows Active-Directory via IAS).</description>
  <date>2016-02-15</date>
  <time>15:11:50</time>
  <version>
-  <release>1.4.0b1</release>
+  <release>1.4.1</release>
   <api>1.4.0b1</api>
  </version>
  <stability>
@@ -44,11 +44,11 @@ OS (for example against Windows Active-Directory via IAS).</description>
    <file md5sum="86285d20163dd259ed7823d8fac9dfe4" name="pecl-compat/src/misc.h" role="src" />
    <file md5sum="bd2b4fe3b4c053a338a24efb66a37a18" name="pecl-compat/src/zend_API.h" role="src" />
    <file md5sum="e78c79ee5dfe4622879debc788923a2b" name="pecl-compat/src/zend_hash.h" role="src" />
-   <file md5sum="61244e4767158ab5559888a1ace59caf" name="pecl-compat/src/zend_resource.h" role="src" />
+   <file md5sum="f9453833dbc7987d745ab72028dd1fb9" name="pecl-compat/src/zend_resource.h" role="src" />
    <file md5sum="4964d5e75b79e45810cb5e3af061f70c" name="pecl-compat/src/zend_string.h" role="src" />
-   <file md5sum="4ca10b620178ce5619fdb2985e99ebc9" name="pecl-compat/compat.h" role="src" />
+   <file md5sum="0d3e00de3884c815b833b0caeb2c4bc6" name="pecl-compat/compat.h" role="src" />
    <file md5sum="2df3b9f9a4750e44c0063e90916ea745" name="tests/server/attribute.php" role="test" />
-   <file md5sum="2c80246c2caaa10c3996220e7fc8f375" name="tests/server/fake_server.php" role="test" />
+   <file md5sum="929708eb4c6f810b3b72443dd86d8779" name="tests/server/fake_server.php" role="test" />
    <file md5sum="21ef8d92199a91103fe752d72fa99eb1" name="tests/server/vsa.php" role="test" />
    <file md5sum="48b924771a69fd92f46273fcae8fd187" name="tests/coa.phpt" role="test" />
    <file md5sum="a9c62a0245dda571c869b3c87371d983" name="tests/disconnect.phpt" role="test" />
@@ -87,13 +87,15 @@ OS (for example against Windows Active-Directory via IAS).</description>
    <file md5sum="9ab005d49da8ea33b4fddb62a7ba374c" name="CREDITS" role="doc" />
    <file md5sum="1e50d4afb32d20d3c990cb41976da9ab" name="LICENSE" role="doc" />
    <file md5sum="9e30411dec8d2c49b771d48750927202" name="Makefile.in" role="src" />
-   <file md5sum="5e9da3f2158123abf6833d9c5ad50418" name="php_radius.h" role="src" />
-   <file md5sum="ac38fdd33abdfea8bbf02917c1d02e3b" name="radius.c" role="src" />
+   <file md5sum="4a35d69c110ce81beaf81b5dc99de6e7" name="php_radius.h" role="src" />
+   <file md5sum="744958c7f63eaf79ba2c4ab078962a54" name="radius.c" role="src" />
    <file md5sum="32314145ab4a36966dade15c2261a51a" name="radius.conf" role="src" />
    <file md5sum="a01a9e5453ddccebc5efe87099c24b73" name="radius.dsp" role="src" />
    <file md5sum="c7b1fcf55179bf615e35742eb3f3769c" name="radius.dsw" role="src" />
-   <file md5sum="bc43e393a7c2a747b5964a9c5aee0d8c" name="radius_init_const.h" role="src" />
-   <file md5sum="3feafe670018cb923a827b620e641116" name="radlib.c" role="src" />
+   <file md5sum="6e6ce06e61b2b9779893564a064dc88a" name="radius.stub.php" role="src" />
+   <file md5sum="ad5e48b3d617fa1a0d202c734c452a13" name="radius_arginfo.h" role="src" />
+   <file md5sum="36c53a14ca9a0f2f5011cf36abfc8c03" name="radius_init_const.h" role="src" />
+   <file md5sum="68dc04d9d1597ad40da0960b58c34c4b" name="radlib.c" role="src" />
    <file md5sum="67315cdd8a1fb01f714a0fe66e6ae9ea" name="radlib.h" role="src" />
    <file md5sum="732ba9cd1657b19cd8479fc1e7081249" name="radlib_compat.c" role="src" />
    <file md5sum="22c192f920625f529a77d79df529d185" name="radlib_compat.h" role="src" />
